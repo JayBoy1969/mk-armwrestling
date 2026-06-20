@@ -35,10 +35,8 @@ const timeline = [
   { year: '2024', event: 'International competition debut' },
 ];
 
-// TODO: Replace this placeholder with the real Cloudflare Stream MP4 URL for about.mp4.
-// Cloudflare Stream → upload about.mp4 → enable "MP4 downloads" → copy the
-// https://customer-<CODE>.cloudflarestream.com/<VIDEO_ID>/downloads/default.mp4 URL.
-const ABOUT_VIDEO_URL = 'CLOUDFLARE_STREAM_URL_ABOUT';
+// Hero background video, hosted on a Cloudflare R2 public bucket.
+const ABOUT_VIDEO_URL = 'https://pub-e8926451d30f4159b429239045824a77.r2.dev/about.mp4';
 ---
 
 <Layout title="About">
