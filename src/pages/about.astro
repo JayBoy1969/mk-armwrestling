@@ -34,13 +34,18 @@ const timeline = [
   { year: '2022', event: 'Multiple national titles won' },
   { year: '2024', event: 'International competition debut' },
 ];
+
+// TODO: Replace this placeholder with the real Cloudflare Stream MP4 URL for about.mp4.
+// Cloudflare Stream → upload about.mp4 → enable "MP4 downloads" → copy the
+// https://customer-<CODE>.cloudflarestream.com/<VIDEO_ID>/downloads/default.mp4 URL.
+const ABOUT_VIDEO_URL = 'CLOUDFLARE_STREAM_URL_ABOUT';
 ---
 
 <Layout title="About">
   <Hero
     title="About Us"
     subtitle="Learn about our journey, values, and commitment to arm wrestling excellence."
-    backgroundVideo="/video/about.mp4"
+    backgroundVideo={ABOUT_VIDEO_URL}
     imagePosition="center center"
   />
 

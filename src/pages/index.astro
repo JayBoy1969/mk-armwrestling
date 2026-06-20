@@ -45,6 +45,11 @@ const stats = [
   { value: '25+', label: 'Champions' },
   { value: '10+', label: 'Years' },
 ];
+
+// TODO: Replace this placeholder with the real Cloudflare Stream MP4 URL for promo.mp4.
+// Cloudflare Stream → upload promo.mp4 → enable "MP4 downloads" → copy the
+// https://customer-<CODE>.cloudflarestream.com/<VIDEO_ID>/downloads/default.mp4 URL.
+const PROMO_VIDEO_URL = 'CLOUDFLARE_STREAM_URL_PROMO';
 ---
 
 <Layout title="Home">
@@ -53,7 +58,7 @@ const stats = [
     title="Strength. Power. Victory."
     subtitle="Welcome to MK Armwrestling - where champions are made. Join us in the pursuit of excellence in the sport of arm wrestling."
     showCta={true}
-    backgroundVideo="/video/promo.mp4"
+    backgroundVideo={PROMO_VIDEO_URL}
     backgroundImage="/images/hero.jpg"
     imagePosition="center top"
     videoOnce={true}

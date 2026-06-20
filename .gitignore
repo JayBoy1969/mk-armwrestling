@@ -28,3 +28,6 @@ pnpm-debug.log*
 
 # stray Windows redirect artifact
 nul
+
+# large videos — hosted on Cloudflare Stream, not committed (see TODO URLs in pages)
+public/video/
