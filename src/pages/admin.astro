@@ -136,6 +136,16 @@ const authed = await isAuthenticated(Astro.cookies);
         <input type="text" id="topic" placeholder="e.g., WAF UK Armwrestling Championships 2026">
       </div>
 
+      <div class="form-group">
+        <label>Image search term (optional)</label>
+        <input type="text" id="image-search-term" placeholder="e.g., strength training man — overrides the auto image search">
+      </div>
+
+      <div class="form-group">
+        <label>Guidance / extra context (optional)</label>
+        <textarea id="guidance" style="min-height: 100px;" placeholder="e.g., focus on his left hand technique, mention his competition record"></textarea>
+      </div>
+
       <div>
         <button class="btn btn-primary" id="generate-btn" onclick="generatePost()">Generate Post</button>
       </div>
@@ -215,6 +225,8 @@ const authed = await isAuthenticated(Astro.cookies);
         showStatus('Please enter a topic', 'error');
         return;
       }
+      const imageSearchTerm = document.getElementById('image-search-term').value.trim();
+      const guidance = document.getElementById('guidance').value.trim();
 
       const btn = document.getElementById('generate-btn');
       btn.disabled = true;
@@ -225,7 +237,7 @@ const authed = await isAuthenticated(Astro.cookies);
         const response = await fetch('/api/generate-post', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ topic })
+          body: JSON.stringify({ topic, imageSearchTerm, guidance })
         });
 
         const data = await response.json();
@@ -286,6 +298,8 @@ const authed = await isAuthenticated(Astro.cookies);
         showStatus('Post published successfully! View it at /blog/' + data.slug, 'success');
         clearPreview();
         document.getElementById('topic').value = '';
+        document.getElementById('image-search-term').value = '';
+        document.getElementById('guidance').value = '';
       } catch (error) {
         showStatus('Error: ' + error.message, 'error');
       }

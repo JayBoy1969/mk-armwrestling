@@ -65,7 +65,15 @@ export const POST: APIRoute = async ({ request, cookies }) => {
       });
     }
 
-    const { topic } = (await request.json()) as { topic?: string };
+    const {
+      topic,
+      imageSearchTerm: customImageSearchTerm,
+      guidance,
+    } = (await request.json()) as {
+      topic?: string;
+      imageSearchTerm?: string;
+      guidance?: string;
+    };
 
     if (!topic) {
       return new Response(JSON.stringify({ error: 'Topic is required' }), {
@@ -86,7 +94,12 @@ export const POST: APIRoute = async ({ request, cookies }) => {
 
     const client = new Anthropic({ apiKey: anthropicApiKey });
 
-    const prompt = `Research and write a 250-300 word blog post about: ${topic}. Focus on armwrestling events, results, athletes, and relevant news. Write in an engaging sports journalism style.
+    const trimmedGuidance = typeof guidance === 'string' ? guidance.trim() : '';
+    const guidanceSection = trimmedGuidance
+      ? `\n\nAdditional guidance from the editor — follow this closely: ${trimmedGuidance}`
+      : '';
+
+    const prompt = `Research and write a 250-300 word blog post about: ${topic}. Focus on armwrestling events, results, athletes, and relevant news. Write in an engaging sports journalism style.${guidanceSection}
 
 Return your response as valid JSON with these exact fields:
 {
@@ -142,7 +155,11 @@ Only return the JSON object, no other text.`;
 
     if (unsplashAccessKey && unsplashAccessKey !== 'your_unsplash_access_key_here') {
       try {
-        const searchTerm = postData.imageSearchTerm || 'arm wrestling';
+        // A custom search term from the editor overrides the model's suggestion.
+        const searchTerm =
+          (customImageSearchTerm && customImageSearchTerm.trim()) ||
+          postData.imageSearchTerm ||
+          'arm wrestling';
         const unsplashResponse = await fetch(
           `https://api.unsplash.com/search/photos?query=${encodeURIComponent(searchTerm)}&per_page=1&client_id=${unsplashAccessKey}`
         );
