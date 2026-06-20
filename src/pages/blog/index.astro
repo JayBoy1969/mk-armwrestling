@@ -3,8 +3,11 @@ import Layout from '../../layouts/Layout.astro';
 import Hero from '../../components/Hero.astro';
 import SectionHeader from '../../components/SectionHeader.astro';
 import { getAllPosts } from '../../lib/blog';
+import { getKV } from '../../lib/runtime';
 
-const posts = getAllPosts();
+export const prerender = false;
+
+const posts = await getAllPosts(getKV());
 const featuredPost = posts[0];
 const recentPosts = posts.slice(1);
 ---

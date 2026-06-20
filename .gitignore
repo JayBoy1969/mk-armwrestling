@@ -12,6 +12,11 @@ node_modules/
 .env
 .env.*
 !.env.example
+.dev.vars
+
+# wrangler / miniflare local state
+.wrangler/
+.mf/
 
 # logs
 npm-debug.log*

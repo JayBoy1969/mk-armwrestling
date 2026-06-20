@@ -1,5 +1,8 @@
 ---
 export const prerender = false;
+import { isAuthenticated } from '../lib/auth';
+
+const authed = await isAuthenticated(Astro.cookies);
 ---
 
 <html lang="en">
@@ -38,7 +41,6 @@ export const prerender = false;
     #login-form input:focus { outline: none; border-color: #8B0000; }
 
     /* Admin Panel */
-    #admin-panel { display: none; }
     .form-group { margin-bottom: 1.5rem; }
     .form-group label { display: block; margin-bottom: 0.5rem; color: #999; font-size: 0.9rem; }
     .form-group input, .form-group textarea {
@@ -68,6 +70,19 @@ export const prerender = false;
     .btn-primary:disabled { background: #444; cursor: not-allowed; }
     .btn-secondary { background: #333; color: #fff; margin-left: 1rem; }
     .btn-secondary:hover { background: #444; }
+
+    .panel-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
+    .btn-logout {
+      background: transparent;
+      border: 1px solid #333;
+      color: #999;
+      padding: 0.5rem 1rem;
+      border-radius: 0.5rem;
+      font-family: 'Bebas Neue', sans-serif;
+      letter-spacing: 0.05em;
+      cursor: pointer;
+    }
+    .btn-logout:hover { border-color: #8B0000; color: #fff; }
 
     /* Preview */
     #preview-area {
@@ -100,15 +115,20 @@ export const prerender = false;
     <h1>Blog Admin</h1>
 
     <!-- Login Form -->
-    <div id="login-form">
+    <div id="login-form" style={authed ? 'display: none;' : ''}>
       <h2>Login Required</h2>
-      <input type="password" id="password" placeholder="Enter password" autocomplete="off">
+      <input type="password" id="password" placeholder="Enter password" autocomplete="current-password">
       <button class="btn btn-primary" onclick="login()">Login</button>
       <div id="login-error" class="status error" style="display: none;"></div>
     </div>
 
     <!-- Admin Panel -->
-    <div id="admin-panel">
+    <div id="admin-panel" style={authed ? 'display: block;' : 'display: none;'}>
+      <div class="panel-header">
+        <h2>Generate a Post</h2>
+        <button class="btn-logout" onclick="logout()">Log out</button>
+      </div>
+
       <div id="status-message"></div>
 
       <div class="form-group">
@@ -136,33 +156,47 @@ export const prerender = false;
   </div>
 
   <script is:inline>
-    const CORRECT_PASSWORD = 'mkaw2026';
     let currentPost = null;
 
-    function login() {
+    async function login() {
       const password = document.getElementById('password').value;
       const errorEl = document.getElementById('login-error');
+      errorEl.style.display = 'none';
 
-      if (password === CORRECT_PASSWORD) {
-        document.getElementById('login-form').style.display = 'none';
-        document.getElementById('admin-panel').style.display = 'block';
-        sessionStorage.setItem('admin-logged-in', 'true');
-      } else {
-        errorEl.textContent = 'Incorrect password';
+      try {
+        const res = await fetch('/api/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ password })
+        });
+        if (res.ok) {
+          // Cookie is set; reload so the server renders the admin panel.
+          window.location.reload();
+        } else {
+          const data = await res.json().catch(() => ({}));
+          errorEl.textContent = data.error || 'Incorrect password';
+          errorEl.style.display = 'block';
+        }
+      } catch (e) {
+        errorEl.textContent = 'Login failed. Please try again.';
         errorEl.style.display = 'block';
       }
     }
 
-    // Check if already logged in
-    if (sessionStorage.getItem('admin-logged-in') === 'true') {
-      document.getElementById('login-form').style.display = 'none';
-      document.getElementById('admin-panel').style.display = 'block';
+    async function logout() {
+      try {
+        await fetch('/api/logout', { method: 'POST' });
+      } finally {
+        window.location.reload();
+      }
     }
 
-    // Enter key to login
-    document.getElementById('password').addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') login();
-    });
+    const passwordInput = document.getElementById('password');
+    if (passwordInput) {
+      passwordInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') login();
+      });
+    }
 
     function showStatus(message, type) {
       const el = document.getElementById('status-message');
@@ -196,13 +230,17 @@ export const prerender = false;
 
         const data = await response.json();
 
+        if (response.status === 401) {
+          showStatus('Session expired. Please log in again.', 'error');
+          setTimeout(() => window.location.reload(), 1200);
+          return;
+        }
         if (!response.ok) {
           throw new Error(data.error || 'Failed to generate post');
         }
 
         currentPost = data;
 
-        // Show preview
         document.getElementById('preview-image').src = data.image;
         document.getElementById('preview-title').textContent = data.title;
         document.getElementById('preview-date').textContent = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
@@ -236,6 +274,11 @@ export const prerender = false;
 
         const data = await response.json();
 
+        if (response.status === 401) {
+          showStatus('Session expired. Please log in again.', 'error');
+          setTimeout(() => window.location.reload(), 1200);
+          return;
+        }
         if (!response.ok) {
           throw new Error(data.error || 'Failed to publish post');
         }

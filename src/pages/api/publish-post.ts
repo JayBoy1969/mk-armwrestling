@@ -1,5 +1,7 @@
 import type { APIRoute } from 'astro';
 import { savePost, getPostBySlug, generateSlug, type BlogPost } from '../../lib/blog';
+import { getKV } from '../../lib/runtime';
+import { isAuthenticated } from '../../lib/auth';
 
 export const prerender = false;
 
@@ -14,18 +16,27 @@ function json(body: unknown, status: number): Response {
  * Ensure the generated slug is unique so a new post never silently overwrites
  * an existing one with the same title. Appends -2, -3, … until a free slug is found.
  */
-function uniqueSlug(base: string): string {
+async function uniqueSlug(base: string, kv: KVNamespace): Promise<string> {
   let slug = base;
   let n = 2;
-  while (getPostBySlug(slug)) {
+  while (await getPostBySlug(slug, kv)) {
     slug = `${base}-${n}`;
     n++;
   }
   return slug;
 }
 
-export const POST: APIRoute = async ({ request }) => {
+export const POST: APIRoute = async ({ request, cookies }) => {
   try {
+    if (!(await isAuthenticated(cookies))) {
+      return json({ error: 'Unauthorized' }, 401);
+    }
+
+    const kv = getKV();
+    if (!kv) {
+      return json({ error: 'Blog storage (KV) is not configured' }, 500);
+    }
+
     let data: unknown;
     try {
       data = await request.json();
@@ -44,7 +55,7 @@ export const POST: APIRoute = async ({ request }) => {
 
     // generateSlug can return '' for titles with no latin characters — guard it.
     const baseSlug = generateSlug(title) || `post-${Date.now()}`;
-    const slug = uniqueSlug(baseSlug);
+    const slug = await uniqueSlug(baseSlug, kv);
 
     const post: BlogPost = {
       title: title.trim(),
@@ -58,7 +69,7 @@ export const POST: APIRoute = async ({ request }) => {
       image: typeof image === 'string' && image.trim() ? image.trim() : '/images/hero.jpg',
     };
 
-    savePost(post);
+    await savePost(post, kv);
 
     return json({ success: true, slug: post.slug, message: 'Post published successfully' }, 200);
   } catch (error) {

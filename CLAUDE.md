@@ -1,10 +1,20 @@
 # MKAwrestling Project Guide
 
 ## Stack
-- **Framework**: Astro (static site generator / hybrid)
-- **Styling**: Tailwind CSS
+- **Framework**: Astro (SSR, `output: 'server'`) via the `@astrojs/cloudflare` adapter
+- **Styling**: Tailwind CSS v4
 - **Language**: JavaScript/TypeScript
-- **Node.js**: 18+
+- **Storage**: Cloudflare KV (`BLOG_KV`) for runtime-published blog posts
+- **Node.js**: 22+
+
+## Runtime bindings & secrets
+- Cloudflare bindings are read from `Astro.locals.runtime.env` (see `src/lib/runtime.ts`).
+- Blog persistence lives in `src/lib/blog.ts` (KV-backed; the JSON files in
+  `src/content/blog/` are bundled as read-only seed posts).
+- Admin auth is server-side: `src/lib/auth.ts` + `/api/login` + `/api/logout`;
+  `/api/generate-post` and `/api/publish-post` reject unauthenticated requests.
+- Required env vars: `ANTHROPIC_API_KEY`, `UNSPLASH_ACCESS_KEY`, `ADMIN_PASSWORD`
+  (local: `.env`; production: Cloudflare Pages env vars / secrets).
 
 ## Key Conventions
 
@@ -38,10 +48,16 @@ src/
   styles/          # Global CSS if needed
 ```
 
-## Deployment
-- Deploy to: _(specify: Netlify, Vercel, GitHub Pages, etc.)_
-- Build output: `dist/`
-- Environment variables: _(add .env.example with required vars)_
+## Deployment (Cloudflare Pages)
+- Connect the GitHub repo in Cloudflare Pages. Build command: `npm run build`;
+  build output directory: `dist`.
+- Create a KV namespace and bind it as `BLOG_KV`
+  (`npx wrangler kv namespace create BLOG_KV`, then set the id in `wrangler.toml`
+  or bind it in Pages → Settings → Functions → KV namespace bindings).
+- Add env vars/secrets in the Pages project: `ANTHROPIC_API_KEY`,
+  `UNSPLASH_ACCESS_KEY`, `ADMIN_PASSWORD`.
+- Hero videos are hosted on a Cloudflare R2 public bucket (not committed) — see
+  the R2 URLs in `src/pages/index.astro` and `src/pages/about.astro`.
 
 ## Common Tasks
 - **New page**: Create `.astro` file in `src/pages/`

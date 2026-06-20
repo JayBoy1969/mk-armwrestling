@@ -13,13 +13,14 @@
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.105.0",
-    "@astrojs/node": "^10.1.4",
+    "@astrojs/cloudflare": "^13.7.0",
     "@tailwindcss/vite": "^4.3.1",
     "astro": "^6.4.7",
     "tailwindcss": "^4.3.1"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.9",
+    "@cloudflare/workers-types": "^4.20260620.1",
     "@types/node": "^26.0.0",
     "typescript": "^6.0.3"
   }

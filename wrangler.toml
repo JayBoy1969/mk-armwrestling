@@ -1,0 +1,18 @@
+name = "mk-armwrestling"
+compatibility_date = "2026-06-01"
+compatibility_flags = ["nodejs_compat"]
+pages_build_output_dir = "./dist"
+
+# Blog posts persist in this KV namespace.
+#
+# Create it once, then paste the returned id below (or bind it in the
+# Cloudflare Pages dashboard → Settings → Functions → KV namespace bindings,
+# using the variable name BLOG_KV):
+#
+#   npx wrangler kv namespace create BLOG_KV
+#
+# The local `astro dev` server uses a local Miniflare-backed KV automatically
+# (the id below is only used for `wrangler` deploys / remote access).
+[[kv_namespaces]]
+binding = "BLOG_KV"
+id = "REPLACE_WITH_KV_NAMESPACE_ID"

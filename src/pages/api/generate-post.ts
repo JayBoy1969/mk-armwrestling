@@ -1,5 +1,7 @@
 import type { APIRoute } from 'astro';
 import Anthropic from '@anthropic-ai/sdk';
+import { getSecret } from '../../lib/runtime';
+import { isAuthenticated } from '../../lib/auth';
 
 export const prerender = false;
 
@@ -54,9 +56,16 @@ function extractJson(text: string): PostData | null {
   return null;
 }
 
-export const POST: APIRoute = async ({ request }) => {
+export const POST: APIRoute = async ({ request, cookies }) => {
   try {
-    const { topic } = await request.json();
+    if (!(await isAuthenticated(cookies))) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
+    const { topic } = (await request.json()) as { topic?: string };
 
     if (!topic) {
       return new Response(JSON.stringify({ error: 'Topic is required' }), {
@@ -65,8 +74,8 @@ export const POST: APIRoute = async ({ request }) => {
       });
     }
 
-    const anthropicApiKey = import.meta.env.ANTHROPIC_API_KEY;
-    const unsplashAccessKey = import.meta.env.UNSPLASH_ACCESS_KEY;
+    const anthropicApiKey = getSecret('ANTHROPIC_API_KEY');
+    const unsplashAccessKey = getSecret('UNSPLASH_ACCESS_KEY');
 
     if (!anthropicApiKey || anthropicApiKey === 'your_anthropic_api_key_here') {
       return new Response(JSON.stringify({ error: 'Anthropic API key not configured' }), {
@@ -139,9 +148,12 @@ Only return the JSON object, no other text.`;
         );
 
         if (unsplashResponse.ok) {
-          const unsplashData = await unsplashResponse.json();
-          if (unsplashData.results?.[0]?.urls?.regular) {
-            imageUrl = unsplashData.results[0].urls.regular;
+          const unsplashData = (await unsplashResponse.json()) as {
+            results?: Array<{ urls?: { regular?: string } }>;
+          };
+          const regular = unsplashData.results?.[0]?.urls?.regular;
+          if (regular) {
+            imageUrl = regular;
           }
         }
       } catch (e) {

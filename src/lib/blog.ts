@@ -1,6 +1,3 @@
-import fs from 'node:fs';
-import path from 'node:path';
-
 export interface BlogPost {
   title: string;
   slug: string;
@@ -10,43 +7,44 @@ export interface BlogPost {
   image: string;
 }
 
-const BLOG_DIR = path.join(process.cwd(), 'src/content/blog');
+const KEY_PREFIX = 'post:';
 
-export function getAllPosts(): BlogPost[] {
-  if (!fs.existsSync(BLOG_DIR)) {
-    return [];
-  }
+// The JSON files under src/content/blog are bundled at build time and act as
+// read-only seed content, so the two original posts always appear even before
+// anything is written to KV. Posts created at runtime live in KV and take
+// precedence over a seed post with the same slug.
+const seedModules = import.meta.glob<{ default: BlogPost }>('../content/blog/*.json', {
+  eager: true,
+});
+const SEED_POSTS: BlogPost[] = Object.values(seedModules).map((m) => m.default);
 
-  const files = fs.readdirSync(BLOG_DIR).filter(f => f.endsWith('.json'));
-  const posts: BlogPost[] = [];
-
-  for (const file of files) {
-    const content = fs.readFileSync(path.join(BLOG_DIR, file), 'utf-8');
-    posts.push(JSON.parse(content));
-  }
-
-  // Sort by date descending
+function sortByDateDesc(posts: BlogPost[]): BlogPost[] {
   return posts.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 }
 
-export function getPostBySlug(slug: string): BlogPost | null {
-  const filePath = path.join(BLOG_DIR, `${slug}.json`);
+export async function getAllPosts(kv?: KVNamespace): Promise<BlogPost[]> {
+  const bySlug = new Map<string, BlogPost>();
+  for (const post of SEED_POSTS) bySlug.set(post.slug, post);
 
-  if (!fs.existsSync(filePath)) {
-    return null;
+  if (kv) {
+    const { keys } = await kv.list({ prefix: KEY_PREFIX });
+    const stored = await Promise.all(keys.map((k) => kv.get<BlogPost>(k.name, 'json')));
+    for (const post of stored) if (post) bySlug.set(post.slug, post);
   }
 
-  const content = fs.readFileSync(filePath, 'utf-8');
-  return JSON.parse(content);
+  return sortByDateDesc([...bySlug.values()]);
 }
 
-export function savePost(post: BlogPost): void {
-  if (!fs.existsSync(BLOG_DIR)) {
-    fs.mkdirSync(BLOG_DIR, { recursive: true });
+export async function getPostBySlug(slug: string, kv?: KVNamespace): Promise<BlogPost | null> {
+  if (kv) {
+    const stored = await kv.get<BlogPost>(KEY_PREFIX + slug, 'json');
+    if (stored) return stored;
   }
+  return SEED_POSTS.find((post) => post.slug === slug) ?? null;
+}
 
-  const filePath = path.join(BLOG_DIR, `${post.slug}.json`);
-  fs.writeFileSync(filePath, JSON.stringify(post, null, 2));
+export async function savePost(post: BlogPost, kv: KVNamespace): Promise<void> {
+  await kv.put(KEY_PREFIX + post.slug, JSON.stringify(post));
 }
 
 export function generateSlug(title: string): string {
