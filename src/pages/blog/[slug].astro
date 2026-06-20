@@ -1,13 +1,10 @@
 ---
 import Layout from '../../layouts/Layout.astro';
-import { getAllPosts, getPostBySlug } from '../../lib/blog';
+import { getPostBySlug } from '../../lib/blog';
 
-export async function getStaticPaths() {
-  const posts = getAllPosts();
-  return posts.map(post => ({
-    params: { slug: post.slug }
-  }));
-}
+// Server-rendered: posts are written to disk at runtime by the publish API,
+// so this route is resolved per-request rather than prerendered at build time.
+export const prerender = false;
 
 const { slug } = Astro.params;
 const post = getPostBySlug(slug as string);

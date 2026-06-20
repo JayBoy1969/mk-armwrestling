@@ -16,8 +16,10 @@
   --color-text-secondary: #a0a0a0;
   --color-text-muted: #666666;
 
-  --font-family-heading: 'Bebas Neue', sans-serif;
-  --font-family-body: 'Inter', sans-serif;
+  /* Tailwind v4 generates font utilities from the --font-* namespace,
+     so these power the `font-heading` / `font-body` classes used across the site. */
+  --font-heading: 'Bebas Neue', sans-serif;
+  --font-body: 'Inter', sans-serif;
 }
 
 /* Base Styles */
@@ -26,14 +28,14 @@ html {
 }
 
 body {
-  font-family: var(--font-family-body);
+  font-family: var(--font-body);
   background-color: var(--color-dark-bg);
   color: var(--color-text-primary);
   line-height: 1.6;
 }
 
 h1, h2, h3, h4, h5, h6 {
-  font-family: var(--font-family-heading);
+  font-family: var(--font-heading);
   letter-spacing: 0.05em;
   text-transform: uppercase;
 }
