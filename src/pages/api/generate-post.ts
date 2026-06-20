@@ -4,7 +4,7 @@ import Anthropic from '@anthropic-ai/sdk';
 export const prerender = false;
 
 const MODEL = 'claude-sonnet-4-6';
-const MAX_TOKENS = 3072;
+const MAX_TOKENS = 2048;
 const MAX_CONTINUATIONS = 5;
 
 interface PostData {
