@@ -1,0 +1,108 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { getAllPosts, getPostBySlug } from '../../lib/blog';
+
+export async function getStaticPaths() {
+  const posts = getAllPosts();
+  return posts.map(post => ({
+    params: { slug: post.slug }
+  }));
+}
+
+const { slug } = Astro.params;
+const post = getPostBySlug(slug as string);
+
+if (!post) {
+  return Astro.redirect('/blog');
+}
+
+const formattedDate = new Date(post.date).toLocaleDateString('en-GB', {
+  day: 'numeric',
+  month: 'long',
+  year: 'numeric'
+});
+
+// Convert newlines to paragraphs
+const paragraphs = post.body.split('\n\n').filter(p => p.trim());
+---
+
+<Layout title={post.title}>
+  <article>
+    <!-- Hero -->
+    <section class="relative min-h-[50vh] flex items-end overflow-hidden">
+      <div class="absolute inset-0 bg-dark-bg">
+        <img src={post.image} alt={post.title} class="absolute inset-0 w-full h-full object-cover" />
+        <div class="absolute inset-0 bg-gradient-to-t from-dark-bg via-dark-bg/70 to-transparent"></div>
+      </div>
+      <div class="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pb-12 pt-32">
+        <a href="/blog" class="inline-flex items-center text-blood-red font-heading tracking-wide mb-6 hover:gap-2 transition-all">
+          <svg class="w-5 h-5 mr-2 rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+          </svg>
+          Back to Blog
+        </a>
+        <span class="text-blood-red font-heading tracking-wider">{formattedDate}</span>
+        <h1 class="font-heading text-4xl sm:text-5xl lg:text-6xl text-white mt-2 leading-tight">
+          {post.title}
+        </h1>
+      </div>
+    </section>
+
+    <!-- Content -->
+    <section class="py-12">
+      <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="prose prose-invert max-w-none">
+          {paragraphs.map(paragraph => {
+            if (paragraph.startsWith('**') && paragraph.endsWith('**')) {
+              return <h3 class="font-heading text-xl text-white mt-8 mb-4">{paragraph.replace(/\*\*/g, '')}</h3>;
+            } else if (paragraph.includes('**')) {
+              return <p class="text-text-secondary leading-relaxed mb-6" set:html={paragraph.replace(/\*\*(.*?)\*\*/g, '<strong class="text-white">$1</strong>')} />;
+            }
+            return <p class="text-text-secondary leading-relaxed mb-6">{paragraph}</p>;
+          })}
+        </div>
+
+        <!-- Share -->
+        <div class="border-t border-dark-border mt-12 pt-8">
+          <p class="text-text-muted font-heading tracking-wider mb-4">Share this post</p>
+          <div class="flex gap-4">
+            <a
+              href={`https://www.facebook.com/sharer/sharer.php?u=${Astro.url}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="w-10 h-10 bg-dark-card rounded-lg flex items-center justify-center text-text-muted hover:bg-blood-red hover:text-white transition-all"
+            >
+              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+              </svg>
+            </a>
+            <a
+              href={`https://twitter.com/intent/tweet?url=${Astro.url}&text=${post.title}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="w-10 h-10 bg-dark-card rounded-lg flex items-center justify-center text-text-muted hover:bg-blood-red hover:text-white transition-all"
+            >
+              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/>
+              </svg>
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="py-16 bg-dark-surface">
+      <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <h2 class="font-heading text-3xl text-white mb-4">Want to Learn More?</h2>
+        <p class="text-text-secondary mb-6">Get in touch to learn about training sessions and upcoming events.</p>
+        <a
+          href="/contact"
+          class="inline-flex items-center justify-center px-8 py-4 bg-blood-red text-white font-heading text-lg tracking-wide rounded-lg hover:bg-blood-red-light transition-colors"
+        >
+          Contact Us
+        </a>
+      </div>
+    </section>
+  </article>
+</Layout>

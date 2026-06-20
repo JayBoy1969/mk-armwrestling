@@ -1,0 +1,63 @@
+/* Google Fonts - Bebas Neue */
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600;700&display=swap');
+
+@import "tailwindcss";
+
+/* Custom Theme Variables */
+@theme {
+  --color-blood-red: #8B0000;
+  --color-blood-red-light: #A52A2A;
+  --color-blood-red-dark: #660000;
+  --color-dark-bg: #0a0a0a;
+  --color-dark-surface: #141414;
+  --color-dark-card: #1a1a1a;
+  --color-dark-border: #2a2a2a;
+  --color-text-primary: #ffffff;
+  --color-text-secondary: #a0a0a0;
+  --color-text-muted: #666666;
+
+  --font-family-heading: 'Bebas Neue', sans-serif;
+  --font-family-body: 'Inter', sans-serif;
+}
+
+/* Base Styles */
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-family-body);
+  background-color: var(--color-dark-bg);
+  color: var(--color-text-primary);
+  line-height: 1.6;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-family-heading);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-dark-bg);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-blood-red);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-blood-red-light);
+}
+
+/* Selection */
+::selection {
+  background-color: var(--color-blood-red);
+  color: white;
+}

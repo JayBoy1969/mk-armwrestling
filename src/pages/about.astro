@@ -1,0 +1,137 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Hero from '../components/Hero.astro';
+import SectionHeader from '../components/SectionHeader.astro';
+
+const values = [
+  {
+    title: 'Dedication',
+    description: 'We believe in unwavering commitment to the sport and continuous improvement.',
+    icon: 'M13 10V3L4 14h7v7l9-11h-7z',
+  },
+  {
+    title: 'Respect',
+    description: 'Respect for opponents, teammates, and the sport itself is at the core of everything we do.',
+    icon: 'M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z',
+  },
+  {
+    title: 'Excellence',
+    description: 'We strive for excellence in training, competition, and sportsmanship.',
+    icon: 'M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z',
+  },
+  {
+    title: 'Community',
+    description: 'Building a supportive community where athletes help each other grow stronger.',
+    icon: 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z',
+  },
+];
+
+const timeline = [
+  { year: '2014', event: 'MK Armwrestling founded' },
+  { year: '2016', event: 'First regional championship win' },
+  { year: '2018', event: 'Expanded to national competitions' },
+  { year: '2020', event: 'Launched online training program' },
+  { year: '2022', event: 'Multiple national titles won' },
+  { year: '2024', event: 'International competition debut' },
+];
+---
+
+<Layout title="About">
+  <Hero
+    title="About Us"
+    subtitle="Learn about our journey, values, and commitment to arm wrestling excellence."
+    backgroundVideo="/video/about.mp4"
+    imagePosition="center center"
+  />
+
+  <!-- Story Section -->
+  <section class="py-20">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid md:grid-cols-2 gap-12 items-center">
+        <div>
+          <SectionHeader title="Our Story" centered={false} />
+          <p class="text-text-secondary mb-6">
+            MK Armwrestling was founded with a simple mission: to promote the sport of arm wrestling
+            and develop world-class athletes. What started as a small group of enthusiasts has grown
+            into one of the most respected arm wrestling teams in the region.
+          </p>
+          <p class="text-text-secondary mb-6">
+            Over the years, we've trained dozens of athletes, won numerous championships, and built
+            a community of passionate competitors who push each other to be their best.
+          </p>
+          <p class="text-text-secondary mb-6">
+            Our team includes athletes of all skill levels, from beginners just discovering the sport
+            to seasoned professionals competing on the national and international stage.
+          </p>
+          <p class="text-text-secondary">
+            The club is run by <span class="text-white font-semibold">Ryan Finnerty</span>,
+            <span class="text-white font-semibold">Chris Lewis</span>, and
+            <span class="text-white font-semibold">Jason Brooks</span>, who bring years of
+            competitive experience and a passion for growing the sport.
+          </p>
+        </div>
+        <div class="bg-dark-card rounded-2xl border border-dark-border p-8">
+          <h3 class="font-heading text-2xl text-white mb-6">Our Journey</h3>
+          <div class="space-y-4">
+            {timeline.map((item, index) => (
+              <div class="flex gap-4">
+                <div class="flex flex-col items-center">
+                  <div class="w-3 h-3 bg-blood-red rounded-full"></div>
+                  {index < timeline.length - 1 && (
+                    <div class="w-0.5 h-full bg-dark-border"></div>
+                  )}
+                </div>
+                <div class="pb-4">
+                  <span class="text-blood-red font-heading">{item.year}</span>
+                  <p class="text-text-secondary">{item.event}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Values Section -->
+  <section class="py-20 bg-dark-surface">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <SectionHeader
+        title="Our Values"
+        subtitle="The principles that guide everything we do."
+      />
+      <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
+        {values.map(value => (
+          <div class="bg-dark-card rounded-xl border border-dark-border p-6 text-center hover:border-blood-red/50 transition-all">
+            <div class="w-16 h-16 bg-blood-red/10 rounded-full flex items-center justify-center mx-auto mb-4">
+              <svg class="w-8 h-8 text-blood-red" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d={value.icon} />
+              </svg>
+            </div>
+            <h3 class="font-heading text-xl text-white mb-2">{value.title}</h3>
+            <p class="text-text-muted text-sm">{value.description}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Mission Section -->
+  <section class="py-20">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid md:grid-cols-2 gap-12 items-center">
+        <div class="rounded-2xl overflow-hidden border border-dark-border">
+          <img src="/images/about.jpg" alt="MK Armwrestling team" class="w-full h-full object-cover" />
+        </div>
+        <div>
+          <SectionHeader title="Our Mission" centered={false} />
+          <blockquote class="text-xl text-text-secondary italic border-l-4 border-blood-red pl-6">
+            "To develop world-class arm wrestlers through dedicated training, foster a supportive
+            community of athletes, and promote the sport of arm wrestling to new audiences while
+            upholding the highest standards of sportsmanship and integrity."
+          </blockquote>
+        </div>
+      </div>
+    </div>
+  </section>
+</Layout>

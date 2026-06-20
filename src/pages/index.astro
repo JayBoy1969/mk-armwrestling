@@ -1,0 +1,153 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Hero from '../components/Hero.astro';
+import SectionHeader from '../components/SectionHeader.astro';
+import AthleteCard from '../components/AthleteCard.astro';
+import Button from '../components/Button.astro';
+
+const featuredAthletes = [
+  {
+    name: 'Mark Waldon',
+    weightClass: 'Heavyweight',
+    image: '/images/Mark Waldon.jpg',
+    achievements: ['Club Competitor'],
+  },
+  {
+    name: 'Adam Partyka',
+    weightClass: 'Heavyweight',
+    image: '/images/Adam Partyka .jpg',
+    achievements: ['Club Competitor'],
+  },
+  {
+    name: 'Steven Sowah',
+    weightClass: 'Light Heavyweight',
+    image: '/images/Steven Sowah.jpg',
+    achievements: ['Club Competitor'],
+  },
+];
+
+const latestNews = [
+  {
+    title: 'MK Armwrestling Competes at Regional Championship',
+    date: 'June 15, 2025',
+    description: 'Our team brought home multiple medals from this year\'s Regional Championship.',
+  },
+  {
+    title: 'Training Tips: Building Grip Strength',
+    date: 'June 10, 2025',
+    description: 'Grip strength is fundamental to arm wrestling success. Learn our top exercises.',
+  },
+];
+
+const stats = [
+  { value: '50+', label: 'Athletes' },
+  { value: '100+', label: 'Competitions' },
+  { value: '25+', label: 'Champions' },
+  { value: '10+', label: 'Years' },
+];
+---
+
+<Layout title="Home">
+  <!-- Hero Section -->
+  <Hero
+    title="Strength. Power. Victory."
+    subtitle="Welcome to MK Armwrestling - where champions are made. Join us in the pursuit of excellence in the sport of arm wrestling."
+    showCta={true}
+    backgroundVideo="/video/promo.mp4"
+    backgroundImage="/images/hero.jpg"
+    imagePosition="center top"
+    videoOnce={true}
+  />
+
+  <!-- Stats Section -->
+  <section class="py-16 bg-dark-surface border-y border-dark-border">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-8">
+        {stats.map(stat => (
+          <div class="text-center">
+            <div class="font-heading text-5xl sm:text-6xl text-blood-red mb-2">{stat.value}</div>
+            <div class="text-text-secondary font-heading tracking-wider">{stat.label}</div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- About Preview -->
+  <section class="py-20">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid md:grid-cols-2 gap-12 items-center">
+        <div>
+          <SectionHeader title="About MK Armwrestling" centered={false} />
+          <p class="text-text-secondary mb-6">
+            MK Armwrestling is dedicated to promoting and developing the sport of arm wrestling.
+            Our team of experienced athletes and coaches work together to train the next generation
+            of champions while competing at the highest levels.
+          </p>
+          <p class="text-text-secondary mb-8">
+            Whether you're a seasoned competitor or just starting out, MK Armwrestling welcomes
+            all who share our passion for the sport.
+          </p>
+          <Button href="/about" variant="outline">Learn More</Button>
+        </div>
+        <div class="rounded-2xl overflow-hidden border border-dark-border min-h-[400px]">
+          <img src="/images/gallery-2.jpg" alt="Arm wrestling action" class="w-full h-full object-cover" style="object-position: center center;" />
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Featured Athletes -->
+  <section class="py-20 bg-dark-surface">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <SectionHeader
+        title="Featured Athletes"
+        subtitle="Meet some of our top competitors who represent MK Armwrestling."
+      />
+      <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
+        {featuredAthletes.map(athlete => (
+          <AthleteCard {...athlete} />
+        ))}
+      </div>
+      <div class="text-center mt-12">
+        <Button href="/athletes">View All Athletes</Button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Latest News -->
+  <section class="py-20">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <SectionHeader
+        title="Latest News"
+        subtitle="Stay up to date with MK Armwrestling."
+      />
+      <div class="grid md:grid-cols-2 gap-8">
+        {latestNews.map(post => (
+          <div class="bg-dark-card rounded-xl border border-dark-border p-6 hover:border-blood-red transition-all">
+            <span class="text-blood-red font-heading text-sm tracking-wider">{post.date}</span>
+            <h3 class="font-heading text-2xl text-white mt-2 mb-3">{post.title}</h3>
+            <p class="text-text-secondary">{post.description}</p>
+          </div>
+        ))}
+      </div>
+      <div class="text-center mt-12">
+        <Button href="/blog" variant="outline">View All Posts</Button>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section class="py-20 bg-blood-red">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <h2 class="font-heading text-4xl sm:text-5xl text-white mb-6">
+        Ready to Join the Team?
+      </h2>
+      <p class="text-white/80 text-lg mb-8 max-w-2xl mx-auto">
+        Whether you're looking to compete or just want to train, we'd love to hear from you.
+        Get in touch and start your arm wrestling journey today.
+      </p>
+      <Button href="/contact" variant="secondary" size="lg">Contact Us</Button>
+    </div>
+  </section>
+</Layout>

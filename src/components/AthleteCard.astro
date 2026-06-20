@@ -1,0 +1,46 @@
+---
+interface Props {
+  name: string;
+  weightClass: string;
+  image?: string;
+  achievements?: string[];
+}
+
+const { name, weightClass, image, achievements = [] } = Astro.props;
+---
+
+<div class="bg-dark-card rounded-xl border border-dark-border overflow-hidden hover:border-blood-red transition-all group">
+  <div class="aspect-square bg-dark-surface overflow-hidden">
+    {image ? (
+      <img
+        src={image}
+        alt={name}
+        class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+      />
+    ) : (
+      <div class="w-full h-full flex items-center justify-center">
+        <svg class="w-24 h-24 text-text-muted" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+        </svg>
+      </div>
+    )}
+  </div>
+  <div class="p-6">
+    <h3 class="font-heading text-2xl text-white group-hover:text-blood-red transition-colors">
+      {name}
+    </h3>
+    <p class="text-blood-red font-heading text-sm tracking-wider mb-3">
+      {weightClass}
+    </p>
+    {achievements.length > 0 && (
+      <ul class="space-y-1">
+        {achievements.map(achievement => (
+          <li class="text-text-muted text-sm flex items-center gap-2">
+            <span class="w-1.5 h-1.5 bg-blood-red rounded-full"></span>
+            {achievement}
+          </li>
+        ))}
+      </ul>
+    )}
+  </div>
+</div>

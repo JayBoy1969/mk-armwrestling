@@ -1,0 +1,120 @@
+---
+interface Props {
+  title: string;
+  subtitle?: string;
+  showCta?: boolean;
+  backgroundImage?: string;
+  backgroundVideo?: string;
+  imagePosition?: string;
+  imageSize?: 'cover' | 'contain';
+  videoOnce?: boolean;
+}
+
+const { title, subtitle, showCta = false, backgroundImage, backgroundVideo, imagePosition = 'center center', imageSize = 'cover', videoOnce = false } = Astro.props;
+
+// If videoOnce is true, video plays once then fades to image
+const shouldLoop = backgroundVideo && !videoOnce;
+const showBothLayers = backgroundVideo && backgroundImage && videoOnce;
+---
+
+<section class="relative min-h-[80vh] flex items-center justify-center overflow-hidden">
+  <!-- Background -->
+  <div class="absolute inset-0 bg-dark-bg">
+    {showBothLayers ? (
+      <>
+        <!-- Static image layer (behind) -->
+        <img src={backgroundImage} alt="" class={`absolute inset-0 w-full h-full ${imageSize === 'contain' ? 'object-contain' : 'object-cover'}`} style={`object-position: ${imagePosition};`} />
+        <!-- Video layer (on top, fades out when ended) -->
+        <video
+          id="hero-video"
+          autoplay
+          muted
+          playsinline
+          class="hero-video-fade absolute inset-0 w-full h-full object-cover"
+          style={`object-position: ${imagePosition};`}
+        >
+          <source src={backgroundVideo} type="video/mp4" />
+        </video>
+        <div class="absolute inset-0" style="background-color: rgba(0, 0, 0, 0.55);"></div>
+      </>
+    ) : backgroundVideo ? (
+      <>
+        <video
+          autoplay
+          muted
+          loop={shouldLoop}
+          playsinline
+          class="absolute inset-0 w-full h-full object-cover"
+          style={`object-position: ${imagePosition};`}
+        >
+          <source src={backgroundVideo} type="video/mp4" />
+        </video>
+        <div class="absolute inset-0" style="background-color: rgba(0, 0, 0, 0.55);"></div>
+      </>
+    ) : backgroundImage ? (
+      <>
+        <img src={backgroundImage} alt="" class={`absolute inset-0 w-full h-full ${imageSize === 'contain' ? 'object-contain' : 'object-cover'}`} style={`object-position: ${imagePosition};`} />
+        <div class="absolute inset-0" style="background-color: rgba(0, 0, 0, 0.55);"></div>
+      </>
+    ) : (
+      <div class="absolute inset-0 bg-gradient-to-br from-dark-bg via-dark-surface to-dark-bg"></div>
+    )}
+    <!-- Decorative elements -->
+    <div class="absolute top-0 left-0 w-96 h-96 bg-blood-red/10 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2"></div>
+    <div class="absolute bottom-0 right-0 w-96 h-96 bg-blood-red/10 rounded-full blur-3xl translate-x-1/2 translate-y-1/2"></div>
+  </div>
+
+  <!-- Content -->
+  <div class="relative z-10 max-w-5xl mx-auto px-4 text-center pt-20">
+    <h1 class="font-heading text-5xl sm:text-7xl lg:text-8xl text-white mb-6 leading-tight">
+      {title}
+    </h1>
+    {subtitle && (
+      <p class="text-text-secondary text-lg sm:text-xl max-w-2xl mx-auto mb-8">
+        {subtitle}
+      </p>
+    )}
+    {showCta && (
+      <div class="flex flex-col sm:flex-row gap-4 justify-center">
+        <a
+          href="/blog"
+          class="inline-flex items-center justify-center px-8 py-4 bg-blood-red text-white font-heading text-lg tracking-wide rounded-lg hover:bg-blood-red-light transition-colors"
+        >
+          Latest News
+        </a>
+        <a
+          href="/contact"
+          class="inline-flex items-center justify-center px-8 py-4 bg-dark-card text-white font-heading text-lg tracking-wide rounded-lg border border-dark-border hover:border-blood-red transition-colors"
+        >
+          Contact Us
+        </a>
+      </div>
+    )}
+  </div>
+
+  <!-- Scroll indicator -->
+  <div class="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce">
+    <svg class="w-6 h-6 text-text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+    </svg>
+  </div>
+</section>
+
+<style>
+  .hero-video-fade {
+    opacity: 1;
+    transition: opacity 1s ease-in-out;
+  }
+  .hero-video-fade.fade-out {
+    opacity: 0;
+  }
+</style>
+
+<script>
+  const heroVideo = document.getElementById('hero-video') as HTMLVideoElement;
+  if (heroVideo) {
+    heroVideo.addEventListener('ended', () => {
+      heroVideo.classList.add('fade-out');
+    });
+  }
+</script>

@@ -1,0 +1,38 @@
+---
+interface Props {
+  title: string;
+  date: string;
+  excerpt: string;
+  image?: string;
+  slug?: string;
+}
+
+const { title, date, excerpt, image, slug = '#' } = Astro.props;
+---
+
+<a href={slug === '#' ? '#' : `/blog/${slug}`} class="block bg-dark-card rounded-xl border border-dark-border overflow-hidden hover:border-blood-red transition-all group">
+  {image && (
+    <div class="aspect-video overflow-hidden">
+      <img
+        src={image}
+        alt={title}
+        class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+      />
+    </div>
+  )}
+  <div class="p-6">
+    <span class="text-blood-red font-heading text-sm tracking-wider">{date}</span>
+    <h3 class="font-heading text-2xl text-white mt-2 mb-3 group-hover:text-blood-red transition-colors">
+      {title}
+    </h3>
+    <p class="text-text-secondary text-sm leading-relaxed mb-4">
+      {excerpt}
+    </p>
+    <span class="inline-flex items-center text-blood-red font-heading text-sm tracking-wide group-hover:gap-2 transition-all">
+      Read More
+      <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+      </svg>
+    </span>
+  </div>
+</a>

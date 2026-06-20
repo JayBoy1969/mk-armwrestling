@@ -1,0 +1,30 @@
+# build output
+dist/
+.output/
+
+# dependencies
+node_modules/
+
+# generated types
+.astro/
+
+# environment variables (contains secrets — never commit)
+.env
+.env.*
+!.env.example
+
+# logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# macOS / editor
+.DS_Store
+*.local
+
+# Claude Code local settings (machine-specific)
+.claude/settings.local.json
+
+# stray Windows redirect artifact
+nul

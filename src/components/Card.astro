@@ -1,0 +1,29 @@
+---
+interface Props {
+  title?: string;
+  image?: string;
+  class?: string;
+}
+
+const { title, image, class: className = '' } = Astro.props;
+---
+
+<div class={`bg-dark-card rounded-xl border border-dark-border overflow-hidden hover:border-blood-red/50 transition-all group ${className}`}>
+  {image && (
+    <div class="aspect-video overflow-hidden">
+      <img
+        src={image}
+        alt={title || ''}
+        class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+      />
+    </div>
+  )}
+  <div class="p-6">
+    {title && (
+      <h3 class="font-heading text-xl text-white mb-3 group-hover:text-blood-red transition-colors">
+        {title}
+      </h3>
+    )}
+    <slot />
+  </div>
+</div>
