@@ -3,16 +3,18 @@ compatibility_date = "2026-06-01"
 compatibility_flags = ["nodejs_compat"]
 pages_build_output_dir = "./dist"
 
-# Blog posts persist in this KV namespace.
-#
-# Create it once, then paste the returned id below (or bind it in the
-# Cloudflare Pages dashboard → Settings → Functions → KV namespace bindings,
-# using the variable name BLOG_KV):
-#
-#   npx wrangler kv namespace create BLOG_KV
-#
-# The local `astro dev` server uses a local Miniflare-backed KV automatically
-# (the id below is only used for `wrangler` deploys / remote access).
+# Cloudflare Pages reserves the default "ASSETS" binding name, so the adapter's
+# static-assets binding is renamed here.
+[assets]
+binding = "ASTRO_ASSETS"
+
+# MK_AW_BLOG_POSTS namespace. Used both for blog posts (BLOG_KV) and for the
+# Astro session store the Cloudflare adapter requires (SESSION). Sessions are
+# unused by the app, so sharing the namespace is harmless.
 [[kv_namespaces]]
 binding = "BLOG_KV"
-id = "REPLACE_WITH_KV_NAMESPACE_ID"
+id = "45ccd4f791c54858ad82a63a54310513"
+
+[[kv_namespaces]]
+binding = "SESSION"
+id = "45ccd4f791c54858ad82a63a54310513"
