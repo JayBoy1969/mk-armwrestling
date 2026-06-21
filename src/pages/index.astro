@@ -4,6 +4,13 @@ import Hero from '../components/Hero.astro';
 import SectionHeader from '../components/SectionHeader.astro';
 import AthleteCard from '../components/AthleteCard.astro';
 import Button from '../components/Button.astro';
+import { getAllPosts } from '../lib/blog';
+import { getKV } from '../lib/runtime';
+
+export const prerender = false;
+
+// 3 most recent published posts for the "Latest News & Features" section.
+const latestPosts = (await getAllPosts(getKV())).slice(0, 3);
 
 const featuredAthletes = [
   {
@@ -23,19 +30,6 @@ const featuredAthletes = [
     weightClass: 'Light Heavyweight',
     image: '/images/Steven Sowah.jpg',
     achievements: ['Club Competitor'],
-  },
-];
-
-const latestNews = [
-  {
-    title: 'MK Armwrestling Competes at Regional Championship',
-    date: 'June 15, 2025',
-    description: 'Our team brought home multiple medals from this year\'s Regional Championship.',
-  },
-  {
-    title: 'Training Tips: Building Grip Strength',
-    date: 'June 10, 2025',
-    description: 'Grip strength is fundamental to arm wrestling success. Learn our top exercises.',
   },
 ];
 
@@ -118,22 +112,52 @@ const PROMO_VIDEO_URL = 'https://pub-e8926451d30f4159b429239045824a77.r2.dev/pro
     </div>
   </section>
 
-  <!-- Latest News -->
+  <!-- Latest News & Features -->
   <section class="py-20">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <SectionHeader
-        title="Latest News"
+        title="Latest News & Features"
         subtitle="Stay up to date with MK Armwrestling."
       />
-      <div class="grid md:grid-cols-2 gap-8">
-        {latestNews.map(post => (
-          <div class="bg-dark-card rounded-xl border border-dark-border p-6 hover:border-blood-red transition-all">
-            <span class="text-blood-red font-heading text-sm tracking-wider">{post.date}</span>
-            <h3 class="font-heading text-2xl text-white mt-2 mb-3">{post.title}</h3>
-            <p class="text-text-secondary">{post.description}</p>
-          </div>
-        ))}
-      </div>
+      {latestPosts.length > 0 ? (
+        <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
+          {latestPosts.map(post => (
+            <a href={`/blog/${post.slug}`} class="bg-dark-card rounded-xl border border-dark-border overflow-hidden hover:border-blood-red transition-all group">
+              {post.image && (
+                <div class="aspect-video overflow-hidden">
+                  <img
+                    src={post.image}
+                    alt={post.title}
+                    class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  />
+                </div>
+              )}
+              <div class="p-6">
+                <span class="text-blood-red font-heading text-sm tracking-wider">
+                  {new Date(post.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}
+                </span>
+                <h3 class="font-heading text-2xl text-white mt-2 mb-3 group-hover:text-blood-red transition-colors">
+                  {post.title}
+                </h3>
+                <p class="text-text-secondary text-sm leading-relaxed mb-4">{post.excerpt}</p>
+                <span class="inline-flex items-center text-blood-red font-heading text-sm tracking-wide">
+                  Read More
+                  <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                  </svg>
+                </span>
+              </div>
+            </a>
+          ))}
+        </div>
+      ) : (
+        <div class="max-w-2xl mx-auto text-center py-8">
+          <p class="text-text-secondary text-lg">
+            No news just yet &mdash; we're busy training. Check back soon for competition recaps,
+            athlete features, and updates from the club.
+          </p>
+        </div>
+      )}
       <div class="text-center mt-12">
         <Button href="/blog" variant="outline">View All Posts</Button>
       </div>

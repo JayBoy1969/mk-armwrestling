@@ -24,7 +24,7 @@ const formattedDate = new Date(post.date).toLocaleDateString('en-GB', {
 const paragraphs = post.body.split('\n\n').filter(p => p.trim());
 ---
 
-<Layout title={post.title}>
+<Layout title={post.title} description={post.excerpt} image={post.image} ogType="article">
   <article>
     <!-- Hero -->
     <section class="relative min-h-[50vh] flex items-end overflow-hidden">

@@ -6,9 +6,21 @@ import Footer from '../components/Footer.astro';
 interface Props {
   title: string;
   description?: string;
+  image?: string;
+  ogType?: string;
 }
 
-const { title, description = "MK Armwrestling - Strength. Power. Victory." } = Astro.props;
+const {
+  title,
+  description = 'MK Armwrestling - Strength. Power. Victory.',
+  image = '/images/hero.jpg',
+  ogType = 'website',
+} = Astro.props;
+
+const fullTitle = `${title} | MK Armwrestling`;
+// Resolve relative image / URL paths to absolute for social cards and canonical links.
+const ogImage = new URL(image, Astro.url).href;
+const canonicalURL = new URL(Astro.url.pathname, Astro.url).href;
 ---
 
 <!DOCTYPE html>
@@ -17,8 +29,23 @@ const { title, description = "MK Armwrestling - Strength. Power. Victory." } = A
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content={description} />
+    <link rel="canonical" href={canonicalURL} />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <title>{title} | MK Armwrestling</title>
+    <title>{fullTitle}</title>
+
+    <!-- Open Graph -->
+    <meta property="og:type" content={ogType} />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:url" content={canonicalURL} />
+    <meta property="og:site_name" content="MK Armwrestling" />
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={fullTitle} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImage} />
   </head>
   <body class="bg-dark-bg min-h-screen flex flex-col">
     <Header />
