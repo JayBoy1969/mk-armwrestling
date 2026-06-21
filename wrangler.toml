@@ -16,3 +16,12 @@ id = "45ccd4f791c54858ad82a63a54310513"
 [[kv_namespaces]]
 binding = "SESSION"
 id = "45ccd4f791c54858ad82a63a54310513"
+
+# Uploaded blog post images are stored in R2 (shared with the videos bucket)
+# and served from its public r2.dev domain.
+[[r2_buckets]]
+binding = "MEDIA"
+bucket_name = "mk-armwrestling-videos"
+
+[vars]
+R2_PUBLIC_BASE_URL = "https://pub-e8926451d30f4159b429239045824a77.r2.dev"

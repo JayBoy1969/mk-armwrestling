@@ -8,13 +8,19 @@
 - **Node.js**: 22+
 
 ## Runtime bindings & secrets
-- Cloudflare bindings are read from `Astro.locals.runtime.env` (see `src/lib/runtime.ts`).
-- Blog persistence lives in `src/lib/blog.ts` (KV-backed; the JSON files in
+- Cloudflare bindings/vars are read via `import { env } from "cloudflare:workers"`
+  (see `src/lib/runtime.ts`: `getKV`, `getMediaBucket`, `getSecret`).
+- Blog persistence lives in `src/lib/blog.ts` (KV `BLOG_KV`; the JSON files in
   `src/content/blog/` are bundled as read-only seed posts).
+- Uploaded blog images go to R2 (`MEDIA` binding → `mk-armwrestling-videos`
+  bucket) via `/api/upload-image`, and are served from the bucket's public
+  r2.dev domain (`R2_PUBLIC_BASE_URL`). Unsplash images are hotlinked remote URLs.
 - Admin auth is server-side: `src/lib/auth.ts` + `/api/login` + `/api/logout`;
-  `/api/generate-post` and `/api/publish-post` reject unauthenticated requests.
-- Required env vars: `ANTHROPIC_API_KEY`, `UNSPLASH_ACCESS_KEY`, `ADMIN_PASSWORD`
-  (local: `.env`; production: Cloudflare Pages env vars / secrets).
+  `/api/generate-post`, `/api/publish-post`, `/api/generate-image`, and
+  `/api/upload-image` reject unauthenticated requests.
+- Required secrets: `ANTHROPIC_API_KEY`, `UNSPLASH_ACCESS_KEY`, `ADMIN_PASSWORD`
+  (local: `.env` / `.dev.vars`; production: Cloudflare Worker secrets).
+  Bindings + `R2_PUBLIC_BASE_URL` are declared in `wrangler.toml`.
 
 ## Key Conventions
 

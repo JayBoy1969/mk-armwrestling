@@ -10,6 +10,10 @@ export function getKV(): KVNamespace | undefined {
   return env.BLOG_KV;
 }
 
+export function getMediaBucket(): R2Bucket | undefined {
+  return env.MEDIA;
+}
+
 export function getSecret(key: keyof Cloudflare.Env): string | undefined {
   const value = env[key];
   if (typeof value === 'string') return value;
