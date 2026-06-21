@@ -3,20 +3,40 @@ import Layout from '../layouts/Layout.astro';
 import Hero from '../components/Hero.astro';
 import SectionHeader from '../components/SectionHeader.astro';
 
-const galleryImages = [
-  { src: '/images/gallery-1.jpg', title: 'Competition Action', category: 'competitions' },
-  { src: '/images/gallery-2.jpg', title: 'Match Intensity', category: 'competitions' },
-  { src: '/images/gallery-3.jpg', title: 'Victory Moment', category: 'competitions' },
-  { src: '/images/gallery-4.jpg', title: 'Team Spirit', category: 'team' },
-  { src: '/images/gallery-5.jpg', title: 'Training Session', category: 'training' },
-  { src: '/images/gallery-6.jpg', title: 'Championship Match', category: 'competitions' },
-];
+const INSTAGRAM_HANDLE = 'mkarmwrestling';
+const INSTAGRAM_URL = `https://www.instagram.com/${INSTAGRAM_HANDLE}/`;
+const FACEBOOK_URL = 'https://www.facebook.com/groups/5536349236';
+
+// ───────────────────────────────────────────────────────────────────────────
+// LIVE INSTAGRAM FEED
+//
+// Paste an Instagram-feed widget embed URL below and the live grid of
+// @mkarmwrestling posts appears automatically (auto-updating, no manual uploads).
+//
+// Meta's own Graph/oEmbed API can't list "latest posts" without a Facebook app,
+// an Instagram Business/Creator account linked to a Page, and a refreshing
+// access token — too much setup for this. A free third-party widget is the
+// no-fuss equivalent (this is the iframe fallback):
+//
+//   1. Sign up at https://snapwidget.com or https://lightwidget.com (free).
+//   2. Connect the @mkarmwrestling account and pick a "Grid" layout.
+//   3. Set the widget background to #0a0a0a and the accent/hover to #8B0000
+//      so it matches the site's dark + blood-red theme.
+//   4. Copy the iframe `src` URL it gives you and paste it below.
+//
+// Leave empty to show the styled "Follow us" fallback instead of a broken frame.
+const INSTAGRAM_EMBED_URL = '';
+// Tune to fit your chosen grid (e.g. a 3x3 grid is shorter than 4x4).
+const INSTAGRAM_EMBED_HEIGHT = 900;
 ---
 
-<Layout title="Gallery">
+<Layout
+  title="Gallery"
+  description="The latest from MK Armwrestling on Instagram — competition action, training, and team moments."
+>
   <Hero
     title="Gallery"
-    subtitle="Photos from competitions, training sessions, and team events."
+    subtitle="Straight from our Instagram — competition action, training, and team moments."
     backgroundImage="/images/gallery-1.jpg"
     imagePosition="center top"
   />
@@ -24,69 +44,69 @@ const galleryImages = [
   <section class="py-20">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <SectionHeader
-        title="Photo Gallery"
-        subtitle="Capturing the action and spirit of MK Armwrestling."
+        title="Live From Instagram"
+        subtitle={`The latest posts from @${INSTAGRAM_HANDLE}.`}
       />
 
-      <!-- Gallery Grid -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {galleryImages.map((image) => (
-          <div class="group relative rounded-xl overflow-hidden border border-dark-border hover:border-blood-red transition-all cursor-pointer">
-            <div class="aspect-[4/3] overflow-hidden">
-              <img
-                src={image.src}
-                alt={image.title}
-                class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-              />
-            </div>
-            <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
-              <div class="absolute bottom-0 left-0 right-0 p-4">
-                <h3 class="font-heading text-lg text-white">{image.title}</h3>
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  </section>
-
-  <!-- Featured Image Section -->
-  <section class="py-20 bg-dark-surface">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <SectionHeader
-        title="The Grip"
-        subtitle="Where it all begins - the battle starts at the grip."
-      />
-      <div class="max-w-4xl mx-auto">
-        <div class="rounded-2xl overflow-hidden border border-dark-border">
-          <img
-            src="/images/grip.jpg"
-            alt="Arm wrestling grip close-up"
-            class="w-full h-auto"
-          />
+      {INSTAGRAM_EMBED_URL ? (
+        <div class="rounded-2xl border border-dark-border overflow-hidden bg-dark-card">
+          <iframe
+            title={`Instagram feed for @${INSTAGRAM_HANDLE}`}
+            src={INSTAGRAM_EMBED_URL}
+            class="w-full block"
+            style={`border: 0; height: ${INSTAGRAM_EMBED_HEIGHT}px;`}
+            loading="lazy"
+            allowtransparency="true"
+          ></iframe>
         </div>
-      </div>
+      ) : (
+        <div class="max-w-2xl mx-auto text-center">
+          <div
+            class="mx-auto mb-6 w-20 h-20 rounded-2xl flex items-center justify-center"
+            style="background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);"
+          >
+            <svg class="w-10 h-10 text-white" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M7.75 2h8.5A5.75 5.75 0 0 1 22 7.75v8.5A5.75 5.75 0 0 1 16.25 22h-8.5A5.75 5.75 0 0 1 2 16.25v-8.5A5.75 5.75 0 0 1 7.75 2zm0 1.5A4.25 4.25 0 0 0 3.5 7.75v8.5A4.25 4.25 0 0 0 7.75 20.5h8.5a4.25 4.25 0 0 0 4.25-4.25v-8.5A4.25 4.25 0 0 0 16.25 3.5h-8.5zM12 7a5 5 0 1 1 0 10 5 5 0 0 1 0-10zm0 1.5a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7zm5.25-.88a1.13 1.13 0 1 1 0 2.25 1.13 1.13 0 0 1 0-2.25z" />
+            </svg>
+          </div>
+          <h3 class="font-heading text-3xl text-white mb-3">Follow @{INSTAGRAM_HANDLE}</h3>
+          <p class="text-text-secondary mb-8">
+            Our latest competition photos, training clips, and team moments live on Instagram.
+            Give us a follow to catch all the action.
+          </p>
+          <a
+            href={INSTAGRAM_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="inline-flex items-center justify-center px-8 py-4 bg-blood-red text-white font-heading text-lg tracking-wide rounded-lg hover:bg-blood-red-light transition-colors"
+          >
+            View on Instagram
+          </a>
+        </div>
+      )}
     </div>
   </section>
 
-  <!-- More Photos CTA -->
+  <!-- Follow CTA -->
   <section class="py-16 bg-blood-red">
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-      <h2 class="font-heading text-3xl sm:text-4xl text-white mb-4">
-        Follow Us for More
-      </h2>
+      <h2 class="font-heading text-3xl sm:text-4xl text-white mb-4">Follow Us for More</h2>
       <p class="text-white/80 mb-6">
         See more photos and videos on our social media channels.
       </p>
       <div class="flex gap-4 justify-center">
         <a
-          href="#"
+          href={INSTAGRAM_URL}
+          target="_blank"
+          rel="noopener noreferrer"
           class="inline-flex items-center justify-center px-6 py-3 bg-white text-blood-red font-heading tracking-wide rounded-lg hover:bg-gray-100 transition-colors"
         >
           Instagram
         </a>
         <a
-          href="#"
+          href={FACEBOOK_URL}
+          target="_blank"
+          rel="noopener noreferrer"
           class="inline-flex items-center justify-center px-6 py-3 bg-transparent text-white border border-white font-heading tracking-wide rounded-lg hover:bg-white/10 transition-colors"
         >
           Facebook
