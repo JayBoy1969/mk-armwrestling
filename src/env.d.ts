@@ -18,5 +18,7 @@ declare namespace Cloudflare {
     RESEND_API_KEY: string;
     /** Optional verified Resend sender, e.g. "MK Armwrestling <noreply@mkarmwrestling.co.uk>". */
     RESEND_FROM: string;
+    /** Optional contact-form destination(s), comma-separated. Defaults to info@mkarmwrestling.co.uk. */
+    CONTACT_TO_EMAIL: string;
   }
 }

@@ -4,7 +4,8 @@ import { getSecret } from '../../lib/runtime';
 export const prerender = false;
 
 // Destination lives only in server code so it's never exposed in page HTML.
-const TO_EMAIL = 'info@mkarmwrestling.co.uk';
+// Override via the CONTACT_TO_EMAIL var (comma-separated for multiple recipients).
+const DEFAULT_TO = 'info@mkarmwrestling.co.uk';
 const DEFAULT_FROM = 'MK Armwrestling Website <noreply@mkarmwrestling.co.uk>';
 
 const SUBJECT_LABELS: Record<string, string> = {
@@ -62,6 +63,10 @@ export const POST: APIRoute = async ({ request }) => {
     return json({ error: 'Email service is not configured' }, 500);
   }
   const from = getSecret('RESEND_FROM') || DEFAULT_FROM;
+  const to = (getSecret('CONTACT_TO_EMAIL') || DEFAULT_TO)
+    .split(',')
+    .map((addr) => addr.trim())
+    .filter(Boolean);
 
   const subjectKey = typeof subject === 'string' ? subject : 'general';
   const subjectLabel = SUBJECT_LABELS[subjectKey] ?? 'General Inquiry';
@@ -90,7 +95,7 @@ export const POST: APIRoute = async ({ request }) => {
       },
       body: JSON.stringify({
         from,
-        to: [TO_EMAIL],
+        to,
         reply_to: cleanEmail,
         subject: `Contact form: ${subjectLabel} — ${cleanName}`,
         html,
