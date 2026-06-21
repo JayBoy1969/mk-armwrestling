@@ -6,59 +6,76 @@ import AthleteCard from '../components/AthleteCard.astro';
 
 const heroImage = '/images/training.jpg';
 
+// TODO: replace each empty `instagram` with the athlete's Instagram profile URL
+// (e.g. 'https://instagram.com/their_handle') as they become available.
 const athletes = [
   {
+    name: 'Ryan Finnerty',
+    achievements: ['Club Management'],
+    instagram: '',
+  },
+  {
+    name: 'Chris Lewis',
+    image: '/images/Chris Lewis.jpg',
+    achievements: ['Club Management'],
+    instagram: '',
+  },
+  {
+    name: 'Jason Brooks',
+    image: '/images/Jason Brooks.jpg',
+    achievements: ['Club Management'],
+    instagram: '',
+  },
+  {
     name: 'Mark Waldon',
-    weightClass: 'Heavyweight',
     image: '/images/Mark Waldon.jpg',
     achievements: ['Club Competitor'],
+    instagram: '',
   },
   {
     name: 'Joseph Finnerty',
-    weightClass: 'Middleweight',
     achievements: ['Club Competitor'],
+    instagram: '',
   },
   {
     name: 'Elijah Finnerty',
-    weightClass: 'Lightweight',
     achievements: ['Club Competitor'],
+    instagram: '',
   },
   {
     name: 'James Price',
-    weightClass: 'Heavyweight',
     image: '/images/James Price.jpg',
     achievements: ['Club Competitor'],
+    instagram: '',
   },
   {
     name: 'Tom Ballard',
-    weightClass: 'Middleweight',
     achievements: ['Club Competitor'],
+    instagram: '',
   },
   {
     name: 'Adam Partyka',
-    weightClass: 'Heavyweight',
     image: '/images/Adam Partyka .jpg',
     achievements: ['Club Competitor'],
+    instagram: '',
   },
   {
     name: 'Steven Sowah',
-    weightClass: 'Light Heavyweight',
     image: '/images/Steven Sowah.jpg',
     achievements: ['Club Competitor'],
+    instagram: '',
   },
   {
     name: 'Przemyslaw Charkiewicz',
-    weightClass: 'Heavyweight',
     achievements: ['Club Competitor'],
+    instagram: '',
   },
   {
     name: 'Mathew Preston',
-    weightClass: 'Middleweight',
     achievements: ['Club Competitor'],
+    instagram: '',
   },
 ];
-
-const weightClasses = ['All', 'Super Heavyweight', 'Heavyweight', 'Light Heavyweight', 'Middleweight'];
 ---
 
 <Layout title="Athletes">
@@ -77,23 +94,6 @@ const weightClasses = ['All', 'Super Heavyweight', 'Heavyweight', 'Light Heavywe
         subtitle="From rising stars to seasoned champions, our athletes compete with passion and dedication."
       />
 
-      <!-- Filter Buttons -->
-      <div class="flex flex-wrap gap-3 justify-center mb-12">
-        {weightClasses.map((weightClass, index) => (
-          <button
-            class={`px-4 py-2 rounded-lg font-heading tracking-wide transition-all ${
-              index === 0
-                ? 'bg-blood-red text-white'
-                : 'bg-dark-card text-text-secondary border border-dark-border hover:border-blood-red'
-            }`}
-            data-filter={weightClass.toLowerCase().replace(' ', '-')}
-          >
-            {weightClass}
-          </button>
-        ))}
-      </div>
-
-      <!-- Athletes Grid -->
       <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
         {athletes.map(athlete => (
           <AthleteCard {...athlete} />
