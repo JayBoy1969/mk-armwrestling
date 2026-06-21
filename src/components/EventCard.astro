@@ -5,9 +5,10 @@ interface Props {
   location: string;
   description?: string;
   status?: 'upcoming' | 'completed' | 'live';
+  href?: string;
 }
 
-const { title, date, location, description, status = 'upcoming' } = Astro.props;
+const { title, date, location, description, status = 'upcoming', href } = Astro.props;
 
 const statusStyles = {
   upcoming: 'bg-blood-red text-white',
@@ -51,5 +52,19 @@ const statusLabels = {
 
   {description && (
     <p class="text-text-muted text-sm">{description}</p>
+  )}
+
+  {href && (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      class="inline-flex items-center gap-1 text-blood-red font-heading text-sm tracking-wide mt-4 hover:gap-2 transition-all"
+    >
+      More info
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+      </svg>
+    </a>
   )}
 </div>

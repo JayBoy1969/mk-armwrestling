@@ -1,0 +1,129 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Hero from '../components/Hero.astro';
+import SectionHeader from '../components/SectionHeader.astro';
+import EventCard from '../components/EventCard.astro';
+
+const PAA_URL = 'https://www.paa-armwrestling.com/events';
+const IFA_URL = 'https://armsportfederation.com/events-calendar/';
+
+// UK & Ireland fixtures from the PAA calendar.
+const ukEvents = [
+  { title: 'Siege of Dagda', date: '27 June 2026', location: 'Galway, Ireland', description: 'Hosted by Armaghgeddon Armwrestling Club.' },
+  { title: 'PAA Regional Warzone — Newcastle', date: '4 July 2026', location: 'Three Mile, Gosforth, Newcastle', description: 'Great North Hotel attached to the venue.' },
+  { title: 'Summerslam', date: '18 July 2026', location: 'Sussex' },
+  { title: 'PAA Warzone Season Finale', date: '17 October 2026', location: 'Birmingham' },
+  { title: 'PAA Tier 2 Only Warzone', date: '18 October 2026', location: 'Birmingham' },
+  { title: 'UK & Ireland National Championship', date: '28–29 November 2026', location: 'Birmingham' },
+  { title: 'Udezumou UK — Square Dance', date: '3 January 2027', location: 'Venue TBC' },
+  { title: 'PAA Regional Warzone — Hostile Strength', date: 'Late May 2027', location: 'Motherwell' },
+  { title: 'Crusader Carnage Warzone', date: 'Date TBC', location: 'Swindon area' },
+  { title: 'Yorkshire Cup Warzone', date: 'Date TBC', location: 'Leeds' },
+];
+
+// International events from the IFA / Armsport Federation calendar.
+const intlEvents = [
+  {
+    title: '33rd SENEC HAND IFA Armwrestling World Cup',
+    date: '10–13 July 2026',
+    location: 'Senec, Slovakia',
+    href: 'https://armsportfederation.com/event/33rd-senec-hand-ifa-armwrestling-world-cup-10-13-july-2026/',
+  },
+  {
+    title: 'Kraków Open Cup 2026',
+    date: '22 August 2026',
+    location: 'Kraków, Poland',
+    href: 'https://armsportfederation.com/event/krakow-open-cup-2026/',
+  },
+  {
+    title: 'Dracula Armwrestling International Cup 2026',
+    date: '22–23 August 2026',
+    location: 'Codlea, Brașov, Romania',
+    href: 'https://armsportfederation.com/event/dracula-armwrestling-international-cup-2026-22-23-august-2026-codlea-brasov-romania/',
+  },
+  {
+    title: 'IFA World Armwrestling Championship 2026',
+    date: '22–28 September 2026',
+    location: 'Japan',
+    href: 'https://armsportfederation.com/event/1360/',
+  },
+  {
+    title: 'Mexico National Armwrestling Championship 2026',
+    date: '14–15 November 2026',
+    location: 'Mexico',
+    href: 'https://armsportfederation.com/event/mexico-national-armwrestling-championship-2026/',
+  },
+];
+---
+
+<Layout
+  title="Events"
+  description="Upcoming UK and international armwrestling competitions from the PAA and IFA calendars."
+  image="/images/grip.jpg"
+>
+  <Hero
+    title="Upcoming Events"
+    subtitle="Competitions on the UK and international armwrestling calendar."
+    backgroundImage="/images/grip.jpg"
+    imagePosition="center center"
+  />
+
+  <!-- Intro / source note -->
+  <section class="py-12">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <p class="text-text-secondary">
+        A round-up of upcoming UK &amp; Ireland and international armwrestling competitions, pulled from the
+        <a href={PAA_URL} target="_blank" rel="noopener noreferrer" class="text-blood-red hover:underline">PAA</a>
+        and
+        <a href={IFA_URL} target="_blank" rel="noopener noreferrer" class="text-blood-red hover:underline">IFA</a>
+        calendars. Dates and details can change &mdash; always confirm with the organiser before travelling.
+      </p>
+    </div>
+  </section>
+
+  <!-- UK & Ireland -->
+  <section class="pb-20">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <SectionHeader
+        title="UK & Ireland (PAA)"
+        subtitle="Domestic fixtures from the Professional Armwrestling Alliance."
+      />
+      <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        {ukEvents.map(event => (
+          <EventCard {...event} href={PAA_URL} />
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- International -->
+  <section class="py-20 bg-dark-surface">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <SectionHeader
+        title="International (IFA)"
+        subtitle="World Cup and championship events from the IFA / Armsport Federation calendar."
+      />
+      <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        {intlEvents.map(event => (
+          <EventCard {...event} />
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="py-16 bg-blood-red">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <h2 class="font-heading text-3xl sm:text-4xl text-white mb-4">Competing at One of These?</h2>
+      <p class="text-white/80 mb-6 max-w-2xl mx-auto">
+        Training for a competition or want to travel with the team? Get in touch and we'll help you prepare.
+      </p>
+      <a
+        href="/contact"
+        class="inline-flex items-center justify-center px-8 py-4 bg-white text-blood-red font-heading text-lg tracking-wide rounded-lg hover:bg-gray-100 transition-colors"
+      >
+        Get In Touch
+      </a>
+    </div>
+  </section>
+</Layout>
