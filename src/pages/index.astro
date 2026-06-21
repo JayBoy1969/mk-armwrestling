@@ -70,48 +70,6 @@ const PROMO_VIDEO_URL = 'https://pub-e8926451d30f4159b429239045824a77.r2.dev/pro
     </div>
   </section>
 
-  <!-- About Preview -->
-  <section class="py-20">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="grid md:grid-cols-2 gap-12 items-center">
-        <div>
-          <SectionHeader title="About MK Armwrestling" centered={false} />
-          <p class="text-text-secondary mb-6">
-            MK Armwrestling is dedicated to promoting and developing the sport of arm wrestling.
-            Our team of experienced athletes and coaches work together to train the next generation
-            of champions while competing at the highest levels.
-          </p>
-          <p class="text-text-secondary mb-8">
-            Whether you're a seasoned competitor or just starting out, MK Armwrestling welcomes
-            all who share our passion for the sport.
-          </p>
-          <Button href="/about" variant="outline">Learn More</Button>
-        </div>
-        <div class="rounded-2xl overflow-hidden border border-dark-border min-h-[400px]">
-          <img src="/images/gallery-2.jpg" alt="Arm wrestling action" class="w-full h-full object-cover" style="object-position: center center;" />
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Featured Athletes -->
-  <section class="py-20 bg-dark-surface">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <SectionHeader
-        title="Featured Athletes"
-        subtitle="Meet some of our top competitors who represent MK Armwrestling."
-      />
-      <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
-        {featuredAthletes.map(athlete => (
-          <AthleteCard {...athlete} />
-        ))}
-      </div>
-      <div class="text-center mt-12">
-        <Button href="/athletes">View All Athletes</Button>
-      </div>
-    </div>
-  </section>
-
   <!-- Latest News & Features -->
   <section class="py-20">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -160,6 +118,48 @@ const PROMO_VIDEO_URL = 'https://pub-e8926451d30f4159b429239045824a77.r2.dev/pro
       )}
       <div class="text-center mt-12">
         <Button href="/blog" variant="outline">View All Posts</Button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Featured Athletes -->
+  <section class="py-20 bg-dark-surface">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <SectionHeader
+        title="Featured Athletes"
+        subtitle="Meet some of our top competitors who represent MK Armwrestling."
+      />
+      <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
+        {featuredAthletes.map(athlete => (
+          <AthleteCard {...athlete} />
+        ))}
+      </div>
+      <div class="text-center mt-12">
+        <Button href="/athletes">View All Athletes</Button>
+      </div>
+    </div>
+  </section>
+
+  <!-- About Preview -->
+  <section class="py-20">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid md:grid-cols-2 gap-12 items-center">
+        <div>
+          <SectionHeader title="About MK Armwrestling" centered={false} />
+          <p class="text-text-secondary mb-6">
+            MK Armwrestling is dedicated to promoting and developing the sport of arm wrestling.
+            Our team of experienced athletes and coaches work together to train the next generation
+            of champions while competing at the highest levels.
+          </p>
+          <p class="text-text-secondary mb-8">
+            Whether you're a seasoned competitor or just starting out, MK Armwrestling welcomes
+            all who share our passion for the sport.
+          </p>
+          <Button href="/about" variant="outline">Learn More</Button>
+        </div>
+        <div class="rounded-2xl overflow-hidden border border-dark-border min-h-[400px]">
+          <img src="/images/gallery-2.jpg" alt="Arm wrestling action" class="w-full h-full object-cover" style="object-position: center center;" />
+        </div>
       </div>
     </div>
   </section>
