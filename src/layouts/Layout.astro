@@ -18,9 +18,38 @@ const {
 } = Astro.props;
 
 const fullTitle = `${title} | MK Armwrestling`;
-// Resolve relative image / URL paths to absolute for social cards and canonical links.
-const ogImage = new URL(image, Astro.url).href;
-const canonicalURL = new URL(Astro.url.pathname, Astro.url).href;
+// Build absolute URLs from the configured site domain (falls back to the request
+// URL) so canonicals / og:image point at mkarmwrestling.co.uk regardless of host.
+const base = Astro.site ?? Astro.url;
+const ogImage = new URL(image, base).href;
+const canonicalURL = new URL(Astro.url.pathname, base).href;
+const siteUrl = base.origin;
+
+const orgSchema = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'Organization',
+      '@id': `${siteUrl}/#organization`,
+      name: 'MK Armwrestling',
+      alternateName: 'Milton Keynes Armwrestling',
+      url: siteUrl,
+      logo: `${siteUrl}/favicon.svg`,
+      sameAs: [
+        'https://www.instagram.com/mkarmwrestling/',
+        'https://www.facebook.com/groups/5536349236',
+        'https://www.youtube.com/@miltonkeynesarmwrestling',
+      ],
+    },
+    {
+      '@type': 'WebSite',
+      '@id': `${siteUrl}/#website`,
+      name: 'MK Armwrestling',
+      url: siteUrl,
+      publisher: { '@id': `${siteUrl}/#organization` },
+    },
+  ],
+};
 ---
 
 <!DOCTYPE html>
@@ -46,6 +75,8 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.url).href;
     <meta name="twitter:title" content={fullTitle} />
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={ogImage} />
+
+    <script type="application/ld+json" is:inline set:html={JSON.stringify(orgSchema).replace(/</g, '\\u003c')} />
   </head>
   <body class="bg-dark-bg min-h-screen flex flex-col">
     <Header />

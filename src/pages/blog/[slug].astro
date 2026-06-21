@@ -22,9 +22,28 @@ const formattedDate = new Date(post.date).toLocaleDateString('en-GB', {
 
 // Convert newlines to paragraphs
 const paragraphs = post.body.split('\n\n').filter(p => p.trim());
+
+const base = Astro.site ?? Astro.url;
+const articleSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'BlogPosting',
+  headline: post.title,
+  description: post.excerpt,
+  image: new URL(post.image, base).href,
+  datePublished: post.date,
+  dateModified: post.date,
+  author: { '@type': 'Organization', name: 'MK Armwrestling' },
+  publisher: {
+    '@type': 'Organization',
+    name: 'MK Armwrestling',
+    logo: { '@type': 'ImageObject', url: `${base.origin}/favicon.svg` },
+  },
+  mainEntityOfPage: new URL(Astro.url.pathname, base).href,
+};
 ---
 
 <Layout title={post.title} description={post.excerpt} image={post.image} ogType="article">
+  <script type="application/ld+json" is:inline set:html={JSON.stringify(articleSchema).replace(/</g, '\\u003c')} />
   <article>
     <!-- Hero -->
     <section class="relative min-h-[50vh] flex items-end overflow-hidden">

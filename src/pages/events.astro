@@ -7,53 +7,89 @@ import EventCard from '../components/EventCard.astro';
 const PAA_URL = 'https://www.paa-armwrestling.com/events';
 const IFA_URL = 'https://armsportfederation.com/events-calendar/';
 
+interface EventItem {
+  title: string;
+  date: string;
+  location: string;
+  description?: string;
+  start?: string; // ISO date, for structured data (omitted when TBC)
+  end?: string;
+  href?: string;
+}
+
 // UK & Ireland fixtures from the PAA calendar.
-const ukEvents = [
-  { title: 'Siege of Dagda', date: '27 June 2026', location: 'Galway, Ireland', description: 'Hosted by Armaghgeddon Armwrestling Club.' },
-  { title: 'PAA Regional Warzone — Newcastle', date: '4 July 2026', location: 'Three Mile, Gosforth, Newcastle', description: 'Great North Hotel attached to the venue.' },
-  { title: 'Summerslam', date: '18 July 2026', location: 'Sussex' },
-  { title: 'PAA Warzone Season Finale', date: '17 October 2026', location: 'Birmingham' },
-  { title: 'PAA Tier 2 Only Warzone', date: '18 October 2026', location: 'Birmingham' },
-  { title: 'UK & Ireland National Championship', date: '28–29 November 2026', location: 'Birmingham' },
-  { title: 'Udezumou UK — Square Dance', date: '3 January 2027', location: 'Venue TBC' },
+const ukEvents: EventItem[] = [
+  { title: 'Siege of Dagda', date: '27 June 2026', location: 'Galway, Ireland', description: 'Hosted by Armaghgeddon Armwrestling Club.', start: '2026-06-27' },
+  { title: 'PAA Regional Warzone — Newcastle', date: '4 July 2026', location: 'Three Mile, Gosforth, Newcastle', description: 'Great North Hotel attached to the venue.', start: '2026-07-04' },
+  { title: 'Summerslam', date: '18 July 2026', location: 'Sussex', start: '2026-07-18' },
+  { title: 'PAA Warzone Season Finale', date: '17 October 2026', location: 'Birmingham', start: '2026-10-17' },
+  { title: 'PAA Tier 2 Only Warzone', date: '18 October 2026', location: 'Birmingham', start: '2026-10-18' },
+  { title: 'UK & Ireland National Championship', date: '28–29 November 2026', location: 'Birmingham', start: '2026-11-28', end: '2026-11-29' },
+  { title: 'Udezumou UK — Square Dance', date: '3 January 2027', location: 'Venue TBC', start: '2027-01-03' },
   { title: 'PAA Regional Warzone — Hostile Strength', date: 'Late May 2027', location: 'Motherwell' },
   { title: 'Crusader Carnage Warzone', date: 'Date TBC', location: 'Swindon area' },
   { title: 'Yorkshire Cup Warzone', date: 'Date TBC', location: 'Leeds' },
 ];
 
 // International events from the IFA / Armsport Federation calendar.
-const intlEvents = [
+const intlEvents: EventItem[] = [
   {
     title: '33rd SENEC HAND IFA Armwrestling World Cup',
     date: '10–13 July 2026',
     location: 'Senec, Slovakia',
+    start: '2026-07-10',
+    end: '2026-07-13',
     href: 'https://armsportfederation.com/event/33rd-senec-hand-ifa-armwrestling-world-cup-10-13-july-2026/',
   },
   {
     title: 'Kraków Open Cup 2026',
     date: '22 August 2026',
     location: 'Kraków, Poland',
+    start: '2026-08-22',
     href: 'https://armsportfederation.com/event/krakow-open-cup-2026/',
   },
   {
     title: 'Dracula Armwrestling International Cup 2026',
     date: '22–23 August 2026',
     location: 'Codlea, Brașov, Romania',
+    start: '2026-08-22',
+    end: '2026-08-23',
     href: 'https://armsportfederation.com/event/dracula-armwrestling-international-cup-2026-22-23-august-2026-codlea-brasov-romania/',
   },
   {
     title: 'IFA World Armwrestling Championship 2026',
     date: '22–28 September 2026',
     location: 'Japan',
+    start: '2026-09-22',
+    end: '2026-09-28',
     href: 'https://armsportfederation.com/event/1360/',
   },
   {
     title: 'Mexico National Armwrestling Championship 2026',
     date: '14–15 November 2026',
     location: 'Mexico',
+    start: '2026-11-14',
+    end: '2026-11-15',
     href: 'https://armsportfederation.com/event/mexico-national-armwrestling-championship-2026/',
   },
 ];
+
+// SportsEvent structured data for events with a firm date (rich-result eligible).
+const eventSchema = [
+  ...ukEvents.map((e) => ({ ...e, url: PAA_URL })),
+  ...intlEvents.map((e) => ({ ...e, url: e.href ?? IFA_URL })),
+]
+  .filter((e) => e.start)
+  .map((e) => ({
+    '@context': 'https://schema.org',
+    '@type': 'SportsEvent',
+    name: e.title,
+    startDate: e.start,
+    ...(e.end ? { endDate: e.end } : {}),
+    eventStatus: 'https://schema.org/EventScheduled',
+    location: { '@type': 'Place', name: e.location, address: e.location },
+    url: e.url,
+  }));
 ---
 
 <Layout
@@ -90,7 +126,13 @@ const intlEvents = [
       />
       <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {ukEvents.map(event => (
-          <EventCard {...event} href={PAA_URL} />
+          <EventCard
+            title={event.title}
+            date={event.date}
+            location={event.location}
+            description={event.description}
+            href={PAA_URL}
+          />
         ))}
       </div>
     </div>
@@ -105,7 +147,12 @@ const intlEvents = [
       />
       <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {intlEvents.map(event => (
-          <EventCard {...event} />
+          <EventCard
+            title={event.title}
+            date={event.date}
+            location={event.location}
+            href={event.href}
+          />
         ))}
       </div>
     </div>
@@ -126,4 +173,6 @@ const intlEvents = [
       </a>
     </div>
   </section>
+
+  <script type="application/ld+json" is:inline set:html={JSON.stringify(eventSchema).replace(/</g, '\\u003c')} />
 </Layout>
