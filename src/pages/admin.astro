@@ -146,6 +146,11 @@ const authed = await isAuthenticated(Astro.cookies);
         <textarea id="guidance" style="min-height: 100px;" placeholder="e.g., focus on his left hand technique, mention his competition record"></textarea>
       </div>
 
+      <div class="form-group">
+        <label>Custom image (optional — used instead of Unsplash)</label>
+        <input type="file" id="custom-image" accept="image/*">
+      </div>
+
       <div>
         <button class="btn btn-primary" id="generate-btn" onclick="generatePost()">Generate Post</button>
       </div>
@@ -153,6 +158,13 @@ const authed = await isAuthenticated(Astro.cookies);
       <div id="preview-area">
         <h2>Preview</h2>
         <img id="preview-image" src="" alt="">
+        <div style="margin-bottom: 1.5rem;">
+          <button class="btn btn-secondary" style="margin-left: 0;" onclick="regenerateImage()">Regenerate Image</button>
+          <label class="btn btn-secondary" style="display: inline-block;">
+            Upload Image
+            <input type="file" id="replace-image" accept="image/*" style="display: none;" onchange="replaceImage()">
+          </label>
+        </div>
         <h3 id="preview-title"></h3>
         <div class="date" id="preview-date"></div>
         <div class="excerpt" id="preview-excerpt"></div>
@@ -234,10 +246,29 @@ const authed = await isAuthenticated(Astro.cookies);
       showStatus('Generating post with AI... This may take a moment.', 'loading');
 
       try {
+        // If a custom image was chosen, upload it first and use it for the post.
+        let customImageUrl = '';
+        const imageFile = document.getElementById('custom-image').files[0];
+        if (imageFile) {
+          showStatus('Uploading image...', 'loading');
+          const fd = new FormData();
+          fd.append('image', imageFile);
+          const up = await fetch('/api/upload-image', { method: 'POST', body: fd });
+          const upData = await up.json().catch(() => ({}));
+          if (up.status === 401) {
+            showStatus('Session expired. Please log in again.', 'error');
+            setTimeout(() => window.location.reload(), 1200);
+            return;
+          }
+          if (!up.ok) throw new Error(upData.error || 'Image upload failed');
+          customImageUrl = upData.url;
+          showStatus('Generating post with AI... This may take a moment.', 'loading');
+        }
+
         const response = await fetch('/api/generate-post', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ topic, imageSearchTerm, guidance })
+          body: JSON.stringify({ topic, imageSearchTerm, guidance, customImageUrl })
         });
 
         const data = await response.json();
@@ -300,8 +331,64 @@ const authed = await isAuthenticated(Astro.cookies);
         document.getElementById('topic').value = '';
         document.getElementById('image-search-term').value = '';
         document.getElementById('guidance').value = '';
+        document.getElementById('custom-image').value = '';
       } catch (error) {
         showStatus('Error: ' + error.message, 'error');
+      }
+    }
+
+    // Fetch a fresh Unsplash image for the current post without regenerating text.
+    async function regenerateImage() {
+      if (!currentPost) return;
+      const imageSearchTerm = document.getElementById('image-search-term').value.trim();
+      const topic = document.getElementById('topic').value.trim();
+      showStatus('Finding a new image...', 'loading');
+      try {
+        const res = await fetch('/api/generate-image', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ imageSearchTerm, topic })
+        });
+        const data = await res.json().catch(() => ({}));
+        if (res.status === 401) {
+          showStatus('Session expired. Please log in again.', 'error');
+          setTimeout(() => window.location.reload(), 1200);
+          return;
+        }
+        if (!res.ok) throw new Error(data.error || 'Could not fetch a new image');
+        currentPost.image = data.image;
+        document.getElementById('preview-image').src = data.image;
+        hideStatus();
+      } catch (error) {
+        showStatus('Error: ' + error.message, 'error');
+      }
+    }
+
+    // Replace the current post's image with an uploaded file.
+    async function replaceImage() {
+      if (!currentPost) return;
+      const input = document.getElementById('replace-image');
+      const file = input.files[0];
+      if (!file) return;
+      showStatus('Uploading image...', 'loading');
+      try {
+        const fd = new FormData();
+        fd.append('image', file);
+        const res = await fetch('/api/upload-image', { method: 'POST', body: fd });
+        const data = await res.json().catch(() => ({}));
+        if (res.status === 401) {
+          showStatus('Session expired. Please log in again.', 'error');
+          setTimeout(() => window.location.reload(), 1200);
+          return;
+        }
+        if (!res.ok) throw new Error(data.error || 'Image upload failed');
+        currentPost.image = data.url;
+        document.getElementById('preview-image').src = data.url;
+        hideStatus();
+      } catch (error) {
+        showStatus('Error: ' + error.message, 'error');
+      } finally {
+        input.value = '';
       }
     }
 

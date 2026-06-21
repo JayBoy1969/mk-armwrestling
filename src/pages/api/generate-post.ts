@@ -2,6 +2,7 @@ import type { APIRoute } from 'astro';
 import Anthropic from '@anthropic-ai/sdk';
 import { getSecret } from '../../lib/runtime';
 import { isAuthenticated } from '../../lib/auth';
+import { fetchUnsplashImage } from '../../lib/unsplash';
 
 export const prerender = false;
 
@@ -69,10 +70,12 @@ export const POST: APIRoute = async ({ request, cookies }) => {
       topic,
       imageSearchTerm: customImageSearchTerm,
       guidance,
+      customImageUrl,
     } = (await request.json()) as {
       topic?: string;
       imageSearchTerm?: string;
       guidance?: string;
+      customImageUrl?: string;
     };
 
     if (!topic) {
@@ -150,32 +153,19 @@ Only return the JSON object, no other text.`;
       imageSearchTerm: 'arm wrestling competition',
     };
 
-    // Fetch a relevant image from Unsplash.
+    // Resolve the post image: a custom uploaded image wins; otherwise Unsplash.
     let imageUrl = '/images/hero.jpg'; // Fallback
 
-    if (unsplashAccessKey && unsplashAccessKey !== 'your_unsplash_access_key_here') {
-      try {
-        // A custom search term from the editor overrides the model's suggestion.
-        const searchTerm =
-          (customImageSearchTerm && customImageSearchTerm.trim()) ||
-          postData.imageSearchTerm ||
-          'arm wrestling';
-        const unsplashResponse = await fetch(
-          `https://api.unsplash.com/search/photos?query=${encodeURIComponent(searchTerm)}&per_page=1&client_id=${unsplashAccessKey}`
-        );
-
-        if (unsplashResponse.ok) {
-          const unsplashData = (await unsplashResponse.json()) as {
-            results?: Array<{ urls?: { regular?: string } }>;
-          };
-          const regular = unsplashData.results?.[0]?.urls?.regular;
-          if (regular) {
-            imageUrl = regular;
-          }
-        }
-      } catch (e) {
-        console.error('Unsplash API error:', e);
-      }
+    if (typeof customImageUrl === 'string' && customImageUrl.trim()) {
+      imageUrl = customImageUrl.trim();
+    } else {
+      // A custom search term from the editor overrides the model's suggestion.
+      const searchTerm =
+        (customImageSearchTerm && customImageSearchTerm.trim()) ||
+        postData.imageSearchTerm ||
+        'arm wrestling';
+      const found = await fetchUnsplashImage(searchTerm, unsplashAccessKey);
+      if (found) imageUrl = found;
     }
 
     return new Response(
