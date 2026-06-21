@@ -14,5 +14,9 @@ declare namespace Cloudflare {
     ADMIN_PASSWORD: string;
     ANTHROPIC_API_KEY: string;
     UNSPLASH_ACCESS_KEY: string;
+    /** Resend API key for the contact form. */
+    RESEND_API_KEY: string;
+    /** Optional verified Resend sender, e.g. "MK Armwrestling <noreply@mkarmwrestling.co.uk>". */
+    RESEND_FROM: string;
   }
 }

@@ -18,7 +18,10 @@
 - Admin auth is server-side: `src/lib/auth.ts` + `/api/login` + `/api/logout`;
   `/api/generate-post`, `/api/publish-post`, `/api/generate-image`, and
   `/api/upload-image` reject unauthenticated requests.
-- Required secrets: `ANTHROPIC_API_KEY`, `UNSPLASH_ACCESS_KEY`, `ADMIN_PASSWORD`
+- Contact form (`/api/contact`) emails `info@mkarmwrestling.co.uk` via Resend
+  (`RESEND_API_KEY`, optional `RESEND_FROM`); has a honeypot field. The address
+  is never rendered in page HTML.
+- Required secrets: `ANTHROPIC_API_KEY`, `UNSPLASH_ACCESS_KEY`, `ADMIN_PASSWORD`, `RESEND_API_KEY`
   (local: `.env` / `.dev.vars`; production: Cloudflare Worker secrets).
   Bindings + `R2_PUBLIC_BASE_URL` are declared in `wrangler.toml`.
 
