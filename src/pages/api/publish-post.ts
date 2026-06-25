@@ -44,7 +44,7 @@ export const POST: APIRoute = async ({ request, cookies }) => {
       return json({ error: 'Invalid JSON body' }, 400);
     }
 
-    const { title, body, excerpt, image } = (data ?? {}) as Record<string, unknown>;
+    const { title, body, excerpt, image, date } = (data ?? {}) as Record<string, unknown>;
 
     if (typeof title !== 'string' || !title.trim()) {
       return json({ error: 'A non-empty "title" string is required' }, 400);
@@ -53,6 +53,12 @@ export const POST: APIRoute = async ({ request, cookies }) => {
       return json({ error: 'A non-empty "body" string is required' }, 400);
     }
 
+    // Optional custom date (YYYY-MM-DD); defaults to today.
+    const postDate =
+      typeof date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(date)
+        ? date
+        : new Date().toISOString().split('T')[0];
+
     // generateSlug can return '' for titles with no latin characters — guard it.
     const baseSlug = generateSlug(title) || `post-${Date.now()}`;
     const slug = await uniqueSlug(baseSlug, kv);
@@ -60,7 +66,7 @@ export const POST: APIRoute = async ({ request, cookies }) => {
     const post: BlogPost = {
       title: title.trim(),
       slug,
-      date: new Date().toISOString().split('T')[0],
+      date: postDate,
       excerpt:
         typeof excerpt === 'string' && excerpt.trim()
           ? excerpt.trim()

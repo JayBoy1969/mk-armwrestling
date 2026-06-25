@@ -214,7 +214,11 @@ const authed = await isAuthenticated(Astro.cookies);
         <div class="date" id="preview-date"></div>
         <div class="excerpt" id="preview-excerpt"></div>
         <div class="body" id="preview-body"></div>
-        <div style="margin-top: 2rem;">
+        <div class="form-group" style="margin-top: 1.5rem;">
+          <label>Publish date</label>
+          <input type="date" id="post-date">
+        </div>
+        <div style="margin-top: 1rem;">
           <button class="btn btn-primary" onclick="publishPost()">Publish Post</button>
           <button class="btn btn-secondary" onclick="clearPreview()">Clear</button>
         </div>
@@ -232,6 +236,10 @@ const authed = await isAuthenticated(Astro.cookies);
         <div class="form-group">
           <label>Title</label>
           <input type="text" id="edit-title">
+        </div>
+        <div class="form-group">
+          <label>Date</label>
+          <input type="date" id="edit-date">
         </div>
         <div class="form-group">
           <label>Excerpt</label>
@@ -376,6 +384,7 @@ const authed = await isAuthenticated(Astro.cookies);
         document.getElementById('preview-date').textContent = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
         document.getElementById('preview-excerpt').textContent = data.excerpt;
         document.getElementById('preview-body').innerHTML = data.body.split('\n\n').map(p => `<p>${p}</p>`).join('');
+        document.getElementById('post-date').value = new Date().toISOString().split('T')[0];
         document.getElementById('preview-area').style.display = 'block';
 
         hideStatus();
@@ -399,7 +408,7 @@ const authed = await isAuthenticated(Astro.cookies);
         const response = await fetch('/api/publish-post', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(currentPost)
+          body: JSON.stringify({ ...currentPost, date: document.getElementById('post-date').value })
         });
 
         const data = await response.json();
@@ -526,6 +535,7 @@ const authed = await isAuthenticated(Astro.cookies);
       editingSlug = slug;
       editImageUrl = post.image || '';
       document.getElementById('edit-title').value = post.title || '';
+      document.getElementById('edit-date').value = post.date || '';
       document.getElementById('edit-excerpt').value = post.excerpt || '';
       document.getElementById('edit-body').value = post.body || '';
       const img = document.getElementById('edit-image-preview');
@@ -546,6 +556,7 @@ const authed = await isAuthenticated(Astro.cookies);
       const title = document.getElementById('edit-title').value.trim();
       const excerpt = document.getElementById('edit-excerpt').value.trim();
       const body = document.getElementById('edit-body').value.trim();
+      const date = document.getElementById('edit-date').value;
       if (!title || !body) {
         showStatus('Title and body are required.', 'error');
         return;
@@ -555,7 +566,7 @@ const authed = await isAuthenticated(Astro.cookies);
         const res = await fetch('/api/update-post', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ slug: editingSlug, title, excerpt, body, image: editImageUrl })
+          body: JSON.stringify({ slug: editingSlug, title, excerpt, body, image: editImageUrl, date })
         });
         const data = await res.json().catch(() => ({}));
         if (res.status === 401) {
