@@ -36,3 +36,8 @@ nul
 
 # large videos — hosted on Cloudflare Stream, not committed (see TODO URLs in pages)
 public/video/
+
+# saved source webpages used as blog import sources (scripts/import-from-file.mjs)
+# — e.g. "Save As → Webpage, Complete" produces a .html plus a *_files/ folder
+*_files/
+/BBC Three Counties Radio*.html
