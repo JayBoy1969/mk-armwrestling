@@ -12,6 +12,7 @@
 //   --image <url>        Use this image URL (R2 etc.) instead of an Unsplash pick
 //   --image-file <path>  Upload a local image to R2 (/api/upload-image) and use it
 //   --source <url>    Original source URL, passed to the model for context
+//   --guidance <text>    Verified facts / editorial guidance the rewrite must follow
 //   --date <YYYY-MM-DD>  Publish date (defaults to today)
 //   --base <url>      Site base URL (default: env SITE_BASE or http://localhost:4321)
 //
@@ -34,6 +35,7 @@ function parseArgs(args) {
     if (a === '--image') opts.image = args[++i];
     else if (a === '--image-file') opts.imageFile = args[++i];
     else if (a === '--source') opts.source = args[++i];
+    else if (a === '--guidance') opts.guidance = args[++i];
     else if (a === '--date') opts.date = args[++i];
     else if (a === '--base') opts.base = args[++i];
     else if (a.startsWith('--')) {
@@ -161,7 +163,7 @@ async function main() {
 
   const filePath = positional[0];
   if (!filePath) {
-    console.error('Usage: node scripts/import-from-file.mjs <path-to.html> [--image url] [--image-file path] [--source url] [--date YYYY-MM-DD] [--base url]');
+    console.error('Usage: node scripts/import-from-file.mjs <path-to.html> [--image url] [--image-file path] [--source url] [--guidance text] [--date YYYY-MM-DD] [--base url]');
     exit(1);
   }
 
@@ -195,6 +197,7 @@ async function main() {
   const draft = await postJson(`${base}/api/import-post`, password, {
     content,
     sourceUrl: opts.source,
+    guidance: opts.guidance,
     customImageUrl: imageUrl,
   });
 

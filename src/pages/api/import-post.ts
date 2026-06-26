@@ -65,9 +65,10 @@ export const POST: APIRoute = async ({ request, cookies }) => {
       });
     }
 
-    const { content, sourceUrl, customImageUrl } = (await request.json()) as {
+    const { content, sourceUrl, guidance, customImageUrl } = (await request.json()) as {
       content?: string;
       sourceUrl?: string;
+      guidance?: string;
       customImageUrl?: string;
     };
 
@@ -93,9 +94,14 @@ export const POST: APIRoute = async ({ request, cookies }) => {
     const trimmedSource = typeof sourceUrl === 'string' ? sourceUrl.trim() : '';
     const sourceLine = trimmedSource ? `\n\nOriginal source URL (for context only): ${trimmedSource}` : '';
 
+    const trimmedGuidance = typeof guidance === 'string' ? guidance.trim() : '';
+    const guidanceSection = trimmedGuidance
+      ? `\n\nVerified facts and editorial guidance — follow this strictly. Where it conflicts with or constrains the source content, this guidance wins, and do not invent details beyond it: ${trimmedGuidance}`
+      : '';
+
     const prompt = `You are writing for MK Armwrestling (mkarmwrestling.co.uk), a Milton Keynes based armwrestling club and news site.
 
-Below is content scraped from an external webpage. Rewrite it as an original, engaging 250-300 word blog post in a sports journalism style. Do not copy — summarise, rewrite and add context relevant to the UK armwrestling community where appropriate.${sourceLine}
+Below is content scraped from an external webpage. Rewrite it as an original, engaging 250-300 word blog post in a sports journalism style. Do not copy — summarise, rewrite and add context relevant to the UK armwrestling community where appropriate.${sourceLine}${guidanceSection}
 
 Source content:
 ${content.trim()}
