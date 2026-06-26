@@ -9,7 +9,8 @@
 //   node scripts/import-from-file.mjs <path-to.html> [options]
 //
 // Options:
-//   --image <url>     Use this image URL (R2 etc.) instead of an Unsplash pick
+//   --image <url>        Use this image URL (R2 etc.) instead of an Unsplash pick
+//   --image-file <path>  Upload a local image to R2 (/api/upload-image) and use it
 //   --source <url>    Original source URL, passed to the model for context
 //   --date <YYYY-MM-DD>  Publish date (defaults to today)
 //   --base <url>      Site base URL (default: env SITE_BASE or http://localhost:4321)
@@ -22,6 +23,7 @@
 //   $env:ADMIN_PASSWORD = 'mkaw2026'; node scripts/import-from-file.mjs article.html
 
 import { readFile } from 'node:fs/promises';
+import { basename } from 'node:path';
 import { argv, env, exit } from 'node:process';
 
 function parseArgs(args) {
@@ -30,6 +32,7 @@ function parseArgs(args) {
   for (let i = 0; i < args.length; i++) {
     const a = args[i];
     if (a === '--image') opts.image = args[++i];
+    else if (a === '--image-file') opts.imageFile = args[++i];
     else if (a === '--source') opts.source = args[++i];
     else if (a === '--date') opts.date = args[++i];
     else if (a === '--base') opts.base = args[++i];
@@ -86,6 +89,50 @@ function htmlToText(html) {
   return text.trim();
 }
 
+const MIME_BY_EXT = {
+  jpg: 'image/jpeg',
+  jpeg: 'image/jpeg',
+  png: 'image/png',
+  webp: 'image/webp',
+  gif: 'image/gif',
+  avif: 'image/avif',
+  svg: 'image/svg+xml',
+};
+
+// Upload a local image to R2 via /api/upload-image and return its public URL.
+async function uploadImage(url, password, path) {
+  const ext = (path.split('.').pop() || '').toLowerCase();
+  const type = MIME_BY_EXT[ext];
+  if (!type) {
+    throw new Error(`Unsupported image type ".${ext}" (use jpg/png/webp/gif/avif/svg)`);
+  }
+  const bytes = await readFile(path);
+  const form = new FormData();
+  form.append('image', new File([bytes], basename(path), { type }));
+
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${password}`,
+      // Astro's CSRF check requires multipart POSTs to carry a same-origin
+      // Origin header (JSON POSTs are exempt). Node's fetch omits it, so set it.
+      Origin: new URL(url).origin,
+    },
+    body: form,
+  });
+  const raw = await res.text();
+  let payload;
+  try {
+    payload = raw ? JSON.parse(raw) : {};
+  } catch {
+    payload = { raw };
+  }
+  if (!res.ok) {
+    throw new Error(`${url} -> ${res.status} ${res.statusText}: ${payload?.error || payload?.raw || res.statusText}`);
+  }
+  return payload.url;
+}
+
 async function postJson(url, password, body) {
   const res = await fetch(url, {
     method: 'POST',
@@ -114,7 +161,7 @@ async function main() {
 
   const filePath = positional[0];
   if (!filePath) {
-    console.error('Usage: node scripts/import-from-file.mjs <path-to.html> [--image url] [--source url] [--date YYYY-MM-DD] [--base url]');
+    console.error('Usage: node scripts/import-from-file.mjs <path-to.html> [--image url] [--image-file path] [--source url] [--date YYYY-MM-DD] [--base url]');
     exit(1);
   }
 
@@ -136,11 +183,19 @@ async function main() {
   }
   console.log(`Extracted ${content.length} characters of text.`);
 
+  // Resolve the image: a local file (uploaded to R2) wins over a bare --image URL.
+  let imageUrl = opts.image;
+  if (opts.imageFile) {
+    console.log(`Uploading image ${opts.imageFile} via /api/upload-image ...`);
+    imageUrl = await uploadImage(`${base}/api/upload-image`, password, opts.imageFile);
+    console.log(`  Uploaded: ${imageUrl}`);
+  }
+
   console.log('Rewriting via /api/import-post ...');
   const draft = await postJson(`${base}/api/import-post`, password, {
     content,
     sourceUrl: opts.source,
-    customImageUrl: opts.image,
+    customImageUrl: imageUrl,
   });
 
   console.log(`  Title:   ${draft.title}`);
