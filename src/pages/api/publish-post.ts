@@ -1,7 +1,7 @@
 import type { APIRoute } from 'astro';
 import { savePost, getPostBySlug, generateSlug, type BlogPost } from '../../lib/blog';
 import { getKV } from '../../lib/runtime';
-import { isAuthenticated } from '../../lib/auth';
+import { isAuthenticatedRequest } from '../../lib/auth';
 
 export const prerender = false;
 
@@ -28,7 +28,7 @@ async function uniqueSlug(base: string, kv: KVNamespace): Promise<string> {
 
 export const POST: APIRoute = async ({ request, cookies }) => {
   try {
-    if (!(await isAuthenticated(cookies))) {
+    if (!(await isAuthenticatedRequest(cookies, request))) {
       return json({ error: 'Unauthorized' }, 401);
     }
 

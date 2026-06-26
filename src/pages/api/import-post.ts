@@ -8,7 +8,6 @@ export const prerender = false;
 
 const MODEL = 'claude-sonnet-4-6';
 const MAX_TOKENS = 2048;
-const MAX_CONTINUATIONS = 5;
 
 interface PostData {
   title: string;
@@ -66,20 +65,14 @@ export const POST: APIRoute = async ({ request, cookies }) => {
       });
     }
 
-    const {
-      topic,
-      imageSearchTerm: customImageSearchTerm,
-      guidance,
-      customImageUrl,
-    } = (await request.json()) as {
-      topic?: string;
-      imageSearchTerm?: string;
-      guidance?: string;
+    const { content, sourceUrl, customImageUrl } = (await request.json()) as {
+      content?: string;
+      sourceUrl?: string;
       customImageUrl?: string;
     };
 
-    if (!topic) {
-      return new Response(JSON.stringify({ error: 'Topic is required' }), {
+    if (typeof content !== 'string' || !content.trim()) {
+      return new Response(JSON.stringify({ error: 'Content is required' }), {
         status: 400,
         headers: { 'Content-Type': 'application/json' },
       });
@@ -97,59 +90,39 @@ export const POST: APIRoute = async ({ request, cookies }) => {
 
     const client = new Anthropic({ apiKey: anthropicApiKey });
 
-    const trimmedGuidance = typeof guidance === 'string' ? guidance.trim() : '';
-    const guidanceSection = trimmedGuidance
-      ? `\n\nAdditional guidance from the editor — follow this closely: ${trimmedGuidance}`
-      : '';
+    const trimmedSource = typeof sourceUrl === 'string' ? sourceUrl.trim() : '';
+    const sourceLine = trimmedSource ? `\n\nOriginal source URL (for context only): ${trimmedSource}` : '';
 
-    const prompt = `Research and write a 250-300 word blog post about: ${topic}. Focus on armwrestling events, results, athletes, and relevant news. Write in an engaging sports journalism style.${guidanceSection}
+    const prompt = `You are writing for MK Armwrestling (mkarmwrestling.co.uk), a Milton Keynes based armwrestling club and news site.
 
-Return your response as valid JSON with these exact fields:
+Below is content scraped from an external webpage. Rewrite it as an original, engaging 250-300 word blog post in a sports journalism style. Do not copy — summarise, rewrite and add context relevant to the UK armwrestling community where appropriate.${sourceLine}
+
+Source content:
+${content.trim()}
+
+Return valid JSON only:
 {
-  "title": "Engaging headline for the post",
-  "body": "Full article text with paragraphs separated by double newlines",
-  "excerpt": "50 word summary for preview cards",
-  "imageSearchTerm": "2-3 word search term for finding a relevant image"
-}
+  "title": "Engaging headline",
+  "body": "Full article with paragraphs separated by double newlines",
+  "excerpt": "50 word summary",
+  "imageSearchTerm": "2-3 word image search term"
+}`;
 
-Only return the JSON object, no other text.`;
+    const response = await client.messages.create({
+      model: MODEL,
+      max_tokens: MAX_TOKENS,
+      messages: [{ role: 'user', content: prompt }],
+    });
 
-    // The web search tool runs a server-side loop. If it hits its iteration
-    // limit the response comes back with stop_reason "pause_turn"; resend the
-    // accumulated conversation to let the server resume.
-    const messages: Anthropic.MessageParam[] = [{ role: 'user', content: prompt }];
-    let response;
-
-    for (let i = 0; i < MAX_CONTINUATIONS; i++) {
-      response = await client.messages.create({
-        model: MODEL,
-        max_tokens: MAX_TOKENS,
-        tools: [{ type: 'web_search_20260209', name: 'web_search', max_uses: 5 }],
-        messages,
-      });
-
-      if (response.stop_reason !== 'pause_turn') break;
-      messages.push({ role: 'assistant', content: response.content });
-    }
-
-    if (!response) {
-      return new Response(JSON.stringify({ error: 'No response from model' }), {
-        status: 502,
-        headers: { 'Content-Type': 'application/json' },
-      });
-    }
-
-    // Concatenate every text block — web search can split the reply across
-    // several text blocks interleaved with tool-use/result blocks.
     const textContent = response.content
       .filter((block): block is Anthropic.TextBlock => block.type === 'text')
       .map((block) => block.text)
       .join('\n');
 
     const postData: PostData = extractJson(textContent) ?? {
-      title: `${topic}`,
-      body: `We're excited to share news about ${topic}. Stay tuned for more updates from MK Armwrestling.\n\nCheck back soon for the full story and coverage of this event.`,
-      excerpt: `Latest news and updates about ${topic} from MK Armwrestling.`,
+      title: 'Armwrestling News',
+      body: `We're sharing the latest from the armwrestling world. Check back soon for the full story.`,
+      excerpt: 'Latest news and updates from MK Armwrestling.',
       imageSearchTerm: 'arm wrestling competition',
     };
 
@@ -159,11 +132,7 @@ Only return the JSON object, no other text.`;
     if (typeof customImageUrl === 'string' && customImageUrl.trim()) {
       imageUrl = customImageUrl.trim();
     } else {
-      // A custom search term from the editor overrides the model's suggestion.
-      const searchTerm =
-        (customImageSearchTerm && customImageSearchTerm.trim()) ||
-        postData.imageSearchTerm ||
-        'arm wrestling';
+      const searchTerm = postData.imageSearchTerm || 'arm wrestling';
       const found = await fetchUnsplashImage(searchTerm, unsplashAccessKey);
       if (found) imageUrl = found;
     }
@@ -181,11 +150,11 @@ Only return the JSON object, no other text.`;
       }
     );
   } catch (error) {
-    console.error('Generate post error:', error);
+    console.error('Import post error:', error);
 
     if (error instanceof Anthropic.APIError) {
       const status = typeof error.status === 'number' ? error.status : 502;
-      return new Response(JSON.stringify({ error: 'Failed to generate content' }), {
+      return new Response(JSON.stringify({ error: 'Failed to import content' }), {
         status,
         headers: { 'Content-Type': 'application/json' },
       });
