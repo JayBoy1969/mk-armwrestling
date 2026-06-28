@@ -101,6 +101,63 @@ const MIME_BY_EXT = {
   svg: 'image/svg+xml',
 };
 
+// Google recommends article images be at least 1200px wide for rich results.
+const MIN_WIDTH = 1200;
+
+// Read pixel dimensions straight from the file header — dependency-free.
+// Handles PNG, GIF, JPEG and WebP (VP8/VP8L/VP8X). Returns null if unknown.
+function imageSize(buf) {
+  // PNG: 8-byte signature, then IHDR with width/height as big-endian uint32.
+  if (buf.length >= 24 && buf.toString('ascii', 1, 4) === 'PNG') {
+    return { width: buf.readUInt32BE(16), height: buf.readUInt32BE(20) };
+  }
+  // GIF: width/height as little-endian uint16 at offset 6.
+  if (buf.length >= 10 && buf.toString('ascii', 0, 3) === 'GIF') {
+    return { width: buf.readUInt16LE(6), height: buf.readUInt16LE(8) };
+  }
+  // JPEG: walk the marker segments to the Start-Of-Frame (SOFn).
+  if (buf.length >= 4 && buf[0] === 0xff && buf[1] === 0xd8) {
+    let off = 2;
+    while (off + 9 < buf.length) {
+      if (buf[off] !== 0xff) { off++; continue; }
+      const marker = buf[off + 1];
+      // SOF0–SOF15 carry the frame size, except DHT(C4)/JPG(C8)/DAC(CC).
+      if (marker >= 0xc0 && marker <= 0xcf && marker !== 0xc4 && marker !== 0xc8 && marker !== 0xcc) {
+        return { height: buf.readUInt16BE(off + 5), width: buf.readUInt16BE(off + 7) };
+      }
+      off += 2 + buf.readUInt16BE(off + 2); // skip this segment
+    }
+  }
+  // WebP: RIFF container, then a VP8 / VP8L / VP8X chunk.
+  if (buf.length >= 30 && buf.toString('ascii', 0, 4) === 'RIFF' && buf.toString('ascii', 8, 12) === 'WEBP') {
+    const fourcc = buf.toString('ascii', 12, 16);
+    if (fourcc === 'VP8X') {
+      return { width: 1 + buf.readUIntLE(24, 3), height: 1 + buf.readUIntLE(27, 3) };
+    }
+    if (fourcc === 'VP8 ') {
+      return { width: buf.readUInt16LE(26) & 0x3fff, height: buf.readUInt16LE(28) & 0x3fff };
+    }
+    if (fourcc === 'VP8L') {
+      const b = buf.readUInt32LE(21);
+      return { width: (b & 0x3fff) + 1, height: ((b >> 14) & 0x3fff) + 1 };
+    }
+  }
+  return null;
+}
+
+// BBC images come from ichef.bbci.co.uk/images/ic/<W>x<H>/<id>.jpg at many
+// sizes. If the chosen rendition is below MIN_WIDTH, rewrite the URL to a
+// proportional >=1200px one (keeping aspect ratio). No-op for other hosts.
+function upgradeBbcImageUrl(url) {
+  const m = url.match(/^(https?:\/\/ichef\.bbci\.co\.uk\/images\/ic\/)(\d+)x(\d+)(\/.+)$/i);
+  if (!m) return url;
+  const w = parseInt(m[2], 10);
+  const h = parseInt(m[3], 10);
+  if (w >= MIN_WIDTH) return url;
+  const newH = Math.round((MIN_WIDTH * h) / w);
+  return `${m[1]}${MIN_WIDTH}x${newH}${m[4]}`;
+}
+
 // Upload a local image to R2 via /api/upload-image and return its public URL.
 async function uploadImage(url, password, path) {
   const ext = (path.split('.').pop() || '').toLowerCase();
@@ -109,6 +166,21 @@ async function uploadImage(url, password, path) {
     throw new Error(`Unsupported image type ".${ext}" (use jpg/png/webp/gif/avif/svg)`);
   }
   const bytes = await readFile(path);
+
+  // Warn (don't block) if the image is below Google's recommended width — you
+  // can't upscale quality back in, so this flags it before it goes live.
+  const dim = imageSize(bytes);
+  if (dim && dim.width) {
+    if (dim.width < MIN_WIDTH) {
+      console.warn(
+        `  ⚠ image is ${dim.width}×${dim.height}px — below the ${MIN_WIDTH}px width Google recommends for article images.`
+      );
+      console.warn('    Consider sourcing a larger original; upscaling won’t restore real detail.');
+    } else {
+      console.log(`  image dimensions: ${dim.width}×${dim.height}px (ok)`);
+    }
+  }
+
   const form = new FormData();
   form.append('image', new File([bytes], basename(path), { type }));
 
@@ -191,6 +263,13 @@ async function main() {
     console.log(`Uploading image ${opts.imageFile} via /api/upload-image ...`);
     imageUrl = await uploadImage(`${base}/api/upload-image`, password, opts.imageFile);
     console.log(`  Uploaded: ${imageUrl}`);
+  } else if (imageUrl) {
+    // For a bare --image URL, auto-upgrade small BBC renditions to >=1200px.
+    const upgraded = upgradeBbcImageUrl(imageUrl);
+    if (upgraded !== imageUrl) {
+      console.log(`  Upgraded BBC image to >=${MIN_WIDTH}px: ${upgraded}`);
+      imageUrl = upgraded;
+    }
   }
 
   console.log('Rewriting via /api/import-post ...');
