@@ -1,7 +1,7 @@
 import type { APIRoute } from 'astro';
 import { getAllPosts } from '../../lib/blog';
 import { getKV } from '../../lib/runtime';
-import { isAuthenticated } from '../../lib/auth';
+import { isAuthenticatedRequest } from '../../lib/auth';
 
 export const prerender = false;
 
@@ -13,8 +13,8 @@ function json(body: unknown, status: number): Response {
 }
 
 // Auth-gated list of all posts (full content) for the admin manage/edit UI.
-export const GET: APIRoute = async ({ cookies }) => {
-  if (!(await isAuthenticated(cookies))) {
+export const GET: APIRoute = async ({ cookies, request }) => {
+  if (!(await isAuthenticatedRequest(cookies, request))) {
     return json({ error: 'Unauthorized' }, 401);
   }
 

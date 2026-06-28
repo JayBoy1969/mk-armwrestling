@@ -1,6 +1,6 @@
 import type { APIRoute } from 'astro';
 import { getSecret } from '../../lib/runtime';
-import { isAuthenticated } from '../../lib/auth';
+import { isAuthenticatedRequest } from '../../lib/auth';
 import { fetchUnsplashImage } from '../../lib/unsplash';
 
 export const prerender = false;
@@ -13,7 +13,7 @@ function json(body: unknown, status: number): Response {
 }
 
 export const POST: APIRoute = async ({ request, cookies }) => {
-  if (!(await isAuthenticated(cookies))) {
+  if (!(await isAuthenticatedRequest(cookies, request))) {
     return json({ error: 'Unauthorized' }, 401);
   }
 

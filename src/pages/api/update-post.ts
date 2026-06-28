@@ -1,7 +1,7 @@
 import type { APIRoute } from 'astro';
 import { getPostBySlug, savePost, type BlogPost } from '../../lib/blog';
 import { getKV } from '../../lib/runtime';
-import { isAuthenticated } from '../../lib/auth';
+import { isAuthenticatedRequest } from '../../lib/auth';
 
 export const prerender = false;
 
@@ -15,7 +15,7 @@ function json(body: unknown, status: number): Response {
 // Edit an existing post. The slug + date are preserved (so URLs don't break);
 // title, excerpt, body, and image can change.
 export const POST: APIRoute = async ({ request, cookies }) => {
-  if (!(await isAuthenticated(cookies))) {
+  if (!(await isAuthenticatedRequest(cookies, request))) {
     return json({ error: 'Unauthorized' }, 401);
   }
 
