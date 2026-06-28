@@ -29,12 +29,35 @@ const orgSchema = {
   '@context': 'https://schema.org',
   '@graph': [
     {
-      '@type': 'Organization',
+      '@type': 'SportsClub',
       '@id': `${siteUrl}/#organization`,
       name: 'MK Armwrestling',
       alternateName: 'Milton Keynes Armwrestling',
       url: siteUrl,
       logo: `${siteUrl}/favicon.svg`,
+      image: `${siteUrl}/images/hero.jpg`,
+      sport: 'Armwrestling',
+      areaServed: 'Milton Keynes',
+      address: {
+        '@type': 'PostalAddress',
+        name: 'Muscle Hut',
+        streetAddress: 'Muscle Hut, 11 Bridge Turn Ave, Old Wolverton',
+        addressLocality: 'Milton Keynes',
+        addressRegion: 'Buckinghamshire',
+        postalCode: 'MK12 5QL',
+        addressCountry: 'GB',
+      },
+      geo: {
+        '@type': 'GeoCoordinates',
+        latitude: 52.065695,
+        longitude: -0.810131,
+      },
+      openingHoursSpecification: {
+        '@type': 'OpeningHoursSpecification',
+        dayOfWeek: 'Thursday',
+        opens: '19:00',
+        closes: '21:00',
+      },
       sameAs: [
         'https://www.instagram.com/mkarmwrestling/',
         'https://www.facebook.com/groups/5536349236',
